@@ -1,0 +1,40 @@
+---
+title: "ProblemSet2_new"
+author: "Ke-li Chiu & Diego Mamanche Castellanos"
+date: "06/02/2020"
+output: html_document
+abstract: "Abstract nnnnn nnnnnn"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+#Set up the environment
+library(tidyverse)
+library(dplyr)
+library(ggplot2)
+```
+
+```{r}
+#Set working Directory
+setwd("~/Experimental Design for Data Science/ProblemSet2")
+#Import the dataset
+main_df <- read.csv("neighbourhood-profiles-2016-csv.csv")
+
+```
+
+
+```{r}
+#Filter education per neighbourhood
+neighbourhood_columns <- main_df[1:2, ]
+neighbourhood_columns
+
+no_header_df <- main_df[3:nrow(main_df),]
+no_header_df
+
+education_df <- filter(no_header_df, Category == "Education" | Category == "Education")
+
+education_df
+```
