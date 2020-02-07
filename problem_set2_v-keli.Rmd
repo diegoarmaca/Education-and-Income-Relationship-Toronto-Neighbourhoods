@@ -1,0 +1,211 @@
+---
+title: "ProblemSet2_new"
+author: "Ke-li Chiu & Diego Mamanche Castellanos"
+date: "06/02/2020"
+output:
+  pdf_document: default
+  html_document: default
+abstract: Abstract nnnnn nnnnnn
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+```{r, echo=FALSE, include=FALSE}
+# installing packages
+my_packages <- c("opendatatoronto", "dplyr", "ggplot2", "tidyr", "captioner")
+# For each of the 3 packages, check whether each one exists, and install if not
+for (pkg in my_packages) {
+  
+  if (!pkg %in% installed.packages()) { 
+    # If package is not installed, install it:
+    install.packages(pkg)
+  } 
+}
+# Importing libraries
+library(opendatatoronto)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(knitr)
+library("readxl") #For reading xlsx file
+```
+
+```{r include=FALSE}
+#Set working Directory
+#setwd("~/Experimental Design for Data Science/ProblemSet2")
+#Import the dataset
+main_df_raw <- read.csv("neighbourhood-profiles-2016-csv.csv")
+demographic_data_raw <- read_excel("demographics-nhs-indicators-2011.xlsx")
+```
+
+
+```{r include=FALSE}
+#Filter education per neighbourhood
+neighbourhood_columns <- main_df_raw[1:2, ]
+neighbourhood_columns
+no_header_df <- main_df_raw[c(1,3:nrow(main_df_raw)),]
+no_header_df
+education_df <- filter(no_header_df, Category == "Education" | Category == "Education" | Category == "Neighbourhood Information" | Category == "Income")
+education_df
+```
+
+```{r include=FALSE}
+# Reshape the dataframe (swap row and columns)
+education_df_reshaped <- data.frame(t(education_df[-1]))
+colnames(education_df_reshaped) <- education_df[, 1]
+
+# Slice the reshaped dataframe
+education_df_sliced <- education_df_reshaped %>%
+  dplyr::slice(4:nrow(education_df_reshaped))
+
+# I forgot what this does, convert value to numeric?
+names(education_df_sliced) <- as.matrix(education_df_sliced[1, ])
+education_df_sliced <- education_df_sliced[-1, ]
+education_df_sliced[] <- lapply(education_df_sliced, function(x) type.convert(as.character(x)))
+
+# Rename and columns
+library(janitor)
+education_df_sliced <- education_df_sliced %>% clean_names()
+demographic_data_raw <- demographic_data_raw %>% clean_names()
+education_df_sliced <- education_df_sliced %>%
+  rename(total_population = total_major_field_of_study_classification_of_instructional_programs_cip_2016_for_the_population_aged_25_to_64_years_in_private_households_25_percent_sample_data)
+demographic_data_raw <- rename(demographic_data_raw,  "neighbourhood_number"= "hood_number")
+education_df_sliced <- merge(education_df_sliced, demographic_data_raw, by = 'neighbourhood_number')
+
+# Select wanted columns to make a new dataframe
+education_df_cleaned <- education_df_sliced %>%
+  select(
+    "neighbourhood_number",
+    "total_population.x",
+    "median_household_total_income",
+    "education",
+    "visual_and_performing_arts_and_communications_technologies",
+    "humanities",
+    "social_and_behavioural_sciences_and_law",
+    "business_management_and_public_administration",
+    "physical_and_life_sciences_and_technologies",
+    "mathematics_computer_and_information_sciences",
+    "architecture_engineering_and_related_technologies",
+    "agriculture_natural_resources_and_conservation",
+    "personal_protective_and_transportation_services",
+    "no_postsecondary_certificate_diploma_or_degree_2"
+  )
+
+```
+```{r include=FALSE}
+# Make new columns that have percentage values for each major (we probably want to rename them to something more meaningful)
+education_add_percentage <- 
+  mutate(education_df_cleaned, education_pt =
+           (education_df_cleaned$education/education_df_cleaned$total_population)*100)
+education_add_percentage <- 
+  mutate(education_add_percentage, arts_pt =
+           (education_df_cleaned$visual_and_performing_arts_and_communications_technologies/education_df_cleaned$total_population)*100)
+education_add_percentage <- 
+  mutate(education_add_percentage, humanities_pt =
+           (education_df_cleaned$humanities/education_df_cleaned$total_population)*100)
+education_add_percentage <- 
+  mutate(education_add_percentage, social_pt =
+           (education_df_cleaned$social_and_behavioural_sciences_and_law/education_df_cleaned$total_population)*100)
+education_add_percentage <- 
+  mutate(education_add_percentage, business_pt =
+           (education_df_cleaned$business_management_and_public_administration/education_df_cleaned$total_population)*100)
+education_add_percentage <- 
+  mutate(education_add_percentage, physical_pt =
+           (education_df_cleaned$physical_and_life_sciences_and_technologies/education_df_cleaned$total_population)*100)
+education_add_percentage <- 
+  mutate(education_add_percentage, math_pt =
+           (education_df_cleaned$mathematics_computer_and_information_sciences/education_df_cleaned$total_population)*100)
+education_add_percentage <- 
+  mutate(education_add_percentage, architecture_pt =
+           (education_df_cleaned$architecture_engineering_and_related_technologies/education_df_cleaned$total_population)*100)
+education_add_percentage <- 
+  mutate(education_add_percentage, agriculture_pt =
+           (education_df_cleaned$agriculture_natural_resources_and_conservation/education_df_cleaned$total_population)*100)
+education_add_percentage <- 
+  mutate(education_add_percentage, transportation_pt =
+           (education_df_cleaned$personal_protective_and_transportation_services/education_df_cleaned$total_population)*100)
+education_add_percentage <- 
+  mutate(education_add_percentage, no_certificate_pt =
+           (education_df_cleaned$no_postsecondary_certificate_diploma_or_degree_2/education_df_cleaned$total_population)*100)
+
+# Make a dataframe that has only percentage columns
+education_percentage_only <- education_add_percentage %>%
+  select(
+    "total_population.x",
+    "neighbourhood_number",
+    "median_household_total_income",
+    "education_pt",
+    "arts_pt",
+    "humanities_pt",
+    "social_pt",
+    "business_pt",
+    "physical_pt",
+    "math_pt",
+    "architecture_pt",
+    "agriculture_pt",
+    "transportation_pt",
+    "no_certificate_pt"
+  )
+```
+
+```{r}
+# Explore relationship between income and every major perecntage
+education_percentage_only %>%
+  gather(-c(median_household_total_income, total_population.x), key = "numberhood_number", value = "value") %>% 
+  ggplot(aes(x = value, y = as.numeric(median_household_total_income))) +
+    facet_wrap(~ numberhood_number, scales = "free") +
+    geom_point(shape=20, color="blue", size=1) +
+    stat_smooth(method=lm, se=FALSE)
+```
+
+```{r}
+# Business major seem to have a stiff line, lets zoom in to it
+
+# Get highest 5 and lowest 5 income values
+income <- education_percentage_only$median_household_total_income
+h5th <- sort(income)[length(income)-4]
+l5th <- sort(income)[5]
+
+# Assign income labels to the neighbourhoods
+education_percentage_only$range<-ifelse(income >= h5th,"top 5",
+		ifelse(income <= l5th,"bottom 5","rest"
+		))
+
+# Plot it
+ggplot(education_percentage_only, aes(x=business_pt, y=as.numeric(median_household_total_income), color=range)) + geom_point()
+
+# Linear regression model
+linearMod <- lm(business_pt ~ as.numeric(median_household_total_income), data=education_percentage_only)
+summary(linearMod)
+```
+
+```{r}
+# Plot major percentage distribution in highest income neighbourhood
+education_df_highest <- education_percentage_only %>%
+  filter(median_household_total_income == max(as.numeric(median_household_total_income)) )
+data_plot_highest <- 
+  education_df_highest %>% 
+  pivot_longer(cols = "education_pt":"no_certificate_pt", names_to = "major")
+
+# Make a bar chart
+data_plot_highest %>% 
+  ggplot(aes(x = major, y = value, fill = major)) +
+  geom_col()+
+  ylim(0,40)
+```
+```{r}
+# Plot major percentage distribution in lowest income neighbourhood
+education_df_lowest <- education_percentage_only %>%
+   filter(median_household_total_income == min(as.numeric(median_household_total_income)) )
+education_df_lowest
+data_plot_lowest <- 
+  education_df_lowest %>% 
+  pivot_longer(cols = "education_pt":"no_certificate_pt", names_to = "major")
+
+# Make a bar chart
+data_plot_lowest %>% 
+  ggplot(aes(x = major, y = value, fill = major)) +
+  geom_col()+
+  ylim(0,40)
+```
