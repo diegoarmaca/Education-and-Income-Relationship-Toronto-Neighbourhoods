@@ -12,16 +12,6 @@ abstract: Abstract nnnnn nnnnnn
 knitr::opts_chunk$set(echo = TRUE)
 ```
 ```{r, echo=FALSE, include=FALSE}
-# installing packages
-my_packages <- c("opendatatoronto", "dplyr", "ggplot2", "tidyr", "captioner")
-# For each of the 3 packages, check whether each one exists, and install if not
-for (pkg in my_packages) {
-  
-  if (!pkg %in% installed.packages()) { 
-    # If package is not installed, install it:
-    install.packages(pkg)
-  } 
-}
 # Importing libraries
 library(opendatatoronto)
 library(dplyr)
@@ -31,53 +21,58 @@ library(knitr)
 library("readxl") #For reading xlsx file
 ```
 
-```{r include=FALSE}
-#Set working Directory
-#setwd("~/Experimental Design for Data Science/ProblemSet2")
-#Import the dataset
-main_df_raw <- read.csv("neighbourhood-profiles-2016-csv.csv")
-demographic_data_raw <- read_excel("demographics-nhs-indicators-2011.xlsx")
+```{r}
+# Get the resource we want from this package
+neighbourhood_raw <- list_package_resources("6e19a90f-971c-46b3-852c-0c48c436d1fc") %>% 
+  filter(name == "Neighbourhood Data 2001, 2006, 2011.xlsx") %>% 
+  get_resource()
+main_df_raw <- neighbourhood_raw["2011"]
+main_df_raw <- as.data.frame(main_df_raw)
+# Remove "X2011 prefix from all column names"
+names(main_df_raw) <- substring(names(main_df_raw), 7)
 ```
 
-
-```{r include=FALSE}
+```{r}
 #Filter education per neighbourhood
-neighbourhood_columns <- main_df_raw[1:2, ]
-neighbourhood_columns
-no_header_df <- main_df_raw[c(1,3:nrow(main_df_raw)),]
-no_header_df
-education_df <- filter(no_header_df, Category == "Education" | Category == "Education" | Category == "Neighbourhood Information" | Category == "Income")
+education_df <- filter(main_df_raw, Category == "Education" | Category == "Education" | Category == "Neighbourhood Information" | Category == "Income" | Attribute == "Population, 2011")
+#Add a column of ID and move it to the first
+education_df$ID <- seq.int(nrow(education_df))
+education_df <- education_df%>%select(ID,everything())
 education_df
 ```
 
-```{r include=FALSE}
+```{r}
 # Reshape the dataframe (swap row and columns)
 education_df_reshaped <- data.frame(t(education_df[-1]))
 colnames(education_df_reshaped) <- education_df[, 1]
-
+education_df_reshaped
 # Slice the reshaped dataframe
 education_df_sliced <- education_df_reshaped %>%
-  dplyr::slice(4:nrow(education_df_reshaped))
+  dplyr::slice(3:nrow(education_df_reshaped))
 
-# I forgot what this does, convert value to numeric?
+# Turn characteristics to column names
 names(education_df_sliced) <- as.matrix(education_df_sliced[1, ])
 education_df_sliced <- education_df_sliced[-1, ]
 education_df_sliced[] <- lapply(education_df_sliced, function(x) type.convert(as.character(x)))
 
-# Rename and columns
+# Clean column names
 library(janitor)
 education_df_sliced <- education_df_sliced %>% clean_names()
-demographic_data_raw <- demographic_data_raw %>% clean_names()
-education_df_sliced <- education_df_sliced %>%
-  rename(total_population = total_major_field_of_study_classification_of_instructional_programs_cip_2016_for_the_population_aged_25_to_64_years_in_private_households_25_percent_sample_data)
-demographic_data_raw <- rename(demographic_data_raw,  "neighbourhood_number"= "hood_number")
-education_df_sliced <- merge(education_df_sliced, demographic_data_raw, by = 'neighbourhood_number')
+education_df_sliced$total_population_aged_15_years_and_over_by_major_field_of_study_classification_of_instructional_programs_cip_2011
 
+education_df_sliced
+```
+```{r include=FALSE}
+# Rename and columns
+
+education_df_sliced <- education_df_sliced %>%
+  rename(total_population = total_population_aged_25_to_64_years_by_highest_certificate_diploma_or_degree)
+
+education_df_sliced$total_population
 # Select wanted columns to make a new dataframe
 education_df_cleaned <- education_df_sliced %>%
   select(
-    "neighbourhood_number",
-    "total_population.x",
+    "total_population",
     "median_household_total_income",
     "education",
     "visual_and_performing_arts_and_communications_technologies",
@@ -132,8 +127,7 @@ education_add_percentage <-
 # Make a dataframe that has only percentage columns
 education_percentage_only <- education_add_percentage %>%
   select(
-    "total_population.x",
-    "neighbourhood_number",
+    "total_population",
     "median_household_total_income",
     "education_pt",
     "arts_pt",
@@ -152,9 +146,9 @@ education_percentage_only <- education_add_percentage %>%
 ```{r}
 # Explore relationship between income and every major perecntage
 education_percentage_only %>%
-  gather(-c(median_household_total_income, total_population.x), key = "numberhood_number", value = "value") %>% 
+  gather(-c(median_household_total_income, total_population), key = "var", value = "value") %>% 
   ggplot(aes(x = value, y = as.numeric(median_household_total_income))) +
-    facet_wrap(~ numberhood_number, scales = "free") +
+    facet_wrap(~ var, scales = "free") +
     geom_point(shape=20, color="blue", size=1) +
     stat_smooth(method=lm, se=FALSE)
 ```
@@ -192,7 +186,7 @@ data_plot_highest <-
 data_plot_highest %>% 
   ggplot(aes(x = major, y = value, fill = major)) +
   geom_col()+
-  ylim(0,40)
+  ylim(0,75)
 ```
 ```{r}
 # Plot major percentage distribution in lowest income neighbourhood
@@ -207,5 +201,5 @@ data_plot_lowest <-
 data_plot_lowest %>% 
   ggplot(aes(x = major, y = value, fill = major)) +
   geom_col()+
-  ylim(0,40)
+  ylim(0,75)
 ```
