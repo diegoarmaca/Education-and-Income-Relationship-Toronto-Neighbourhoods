@@ -12,29 +12,85 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r}
 #Set up the environment
-library(tidyverse)
+
+library(opendatatoronto)
 library(dplyr)
+library(tidyr)
 library(ggplot2)
+library(knitr)
 ```
 
 ```{r}
 #Set working Directory
-setwd("~/Experimental Design for Data Science/ProblemSet2")
+#setwd("~/Experimental Design for Data Science/ProblemSet2")
 #Import the dataset
-main_df <- read.csv("neighbourhood-profiles-2016-csv.csv")
+#main_df <- read.csv("neighbourhood-profiles-2016-csv.csv")
+
+
+# Search packages (this returns a table)
+neighbourhood_packages <- search_packages("Neighbourhood")
+### Filtering the neighbourhood demographic dataset
+neighbourhood_demographics_package<- neighbourhood_packages %>%
+  filter(title == "Neighbourhood Profiles")
 
 ```
 
 
 ```{r}
+#Create main dataset for year 2011 
+main_df_2011 <-  neighbourhood_demographics_package %>% # Start with the package 
+  list_package_resources() %>% # List the resources in the package
+  filter(name == "Neighbourhood Data 2001, 2006, 2011.xlsx") %>% # Only keep the resource we want 
+  get_resource()
+```
+
+```{r}
+#Create main dataset for year 2016 
+main_df_2016 <-  neighbourhood_demographics_package %>% # Start with the package 
+  list_package_resources() %>% # List the resources in the package
+  filter(name == "neighbourhood-profiles-2016-csv") %>% # Only keep the resource we want 
+  get_resource()
+```
+
+
+
+```{r}
+##### Distribution by education 2016####
+
 #Filter education per neighbourhood
-neighbourhood_columns <- main_df[1:2, ]
-neighbourhood_columns
+neighbourhood_columns_2016 <- main_df_2016[1:2, ]
+neighbourhood_columns_2016 <- janitor::clean_names(neighbourhood_columns_2016)
+neighbourhood_columns_2016
 
-no_header_df <- main_df[3:nrow(main_df),]
-no_header_df
+no_header_df_2016 <- main_df_2016[3:nrow(main_df_2016),]
+no_header_df_2016 <- janitor::clean_names(no_header_df_2016)
+no_header_df_2016
 
-education_df <- filter(no_header_df, Category == "Education" | Category == "Education")
+education_df_2016 <- filter(no_header_df_2016, category == "Education" & topic == "Major field of study - Classification of Instructional Programs (CIP) 2016")
+names(education_df_2016)[names(education_df_2016) == "_id"] <- "id"
 
-education_df
+
+edu_25_64 <- filter(education_df_2016, characteristic == "Total - Major field of study - Classification of Instructional Programs (CIP) 2016 for the population aged 25 to 64 years in private households - 25% sample data")
+
+education_df_2016 <- filter(education_df_2016, id < as.numeric(edu_25_64["id"]))
+
+
+education_df_2016["characteristic"]
+
+education_df_2016 %>% 
+  filter(!str_detect(characteristic, "^([ ]+[0-9]|Total)"))
+
+
+education_df_2016
+```
+
+
+```{r}
+# Explore relationship between income and every major perecntage
+education_df_2016 %>%
+  gather(-c(city_of_toronto, total_population.x), key = "numberhood_number", value = "value") %>%
+    ggplot(aes(x = value, y = as.numeric(median_household_total_income))) +
+    facet_wrap(~ numberhood_number, scales = "free") +
+    geom_point(shape=20, color="blue", size=1) +
+    stat_smooth(method=lm, se=FALSE)
 ```
