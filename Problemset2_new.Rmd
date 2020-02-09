@@ -3,7 +3,7 @@ title: "ProblemSet2_new"
 author: "Ke-li Chiu & Diego Mamanche Castellanos"
 date: "06/02/2020"
 output: pdf_document
-abstract: "High levels of education, the common characteristics of those who live in Bridle Path-Sunnybrook-York Mills, Toronto's neighbourhood found as the one with the highest median income. By using Toronto's open data, this paper illustrates the education level distribution of the highest and lowest neighbourhood in terms of household income. It is important to understand these distributions because it exposes an alarming income inequality, that can be associated with the education level in each family."
+abstract: "Education is a contributor to many beneficial socio-economic outcomes. We intend to exam the education profile in the selected neighbourhoods of Toronto that have polarized household income from the data set package *Wellbeing Toronto - Demographics: NHS Indicators*. We first observe that the income gap between the neighbourhood with the highest household income and the lowest is enormous. The median household income of Bridle Path-Sunnybrook-York Mills is almost nine times more than Regent Park before tax. Bridle Path-Sunnybrook-York Mills also has a much higher attainment rate (45%) of higher education above a bachelor's degree than Regent Park (23%) and the City of Toronto (27%). We intend to use the comparison to bring awareness of inequality in income and education existing in the City of Toronto."
 ---
 
 ```{r setup, include=FALSE}
