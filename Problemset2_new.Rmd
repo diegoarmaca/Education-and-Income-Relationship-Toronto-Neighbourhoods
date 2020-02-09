@@ -19,42 +19,65 @@ library(tidyverse)
 library(ggplot2)
 library(knitr)
 library(data.table) #Useful to transponse a dataframe
+library(sf)
+library(tmap)
+library(tmaptools)
+library(leaflet)
+
 ```
 
 # Introduction
 Education is a contributor to many beneficial socio-economic outcomes. In the previous study where we examined the educational profile of Toronto’s neighbourhoods, we found that the neighbourhood with the highest median household income has a much higher attainment rate (45%) of higher education above a bachelor’s degree than the compared with the lowest (23%) and the City of Toronto (27%). In this study, we extend the examination of educational profile to the residents’ academic majors in the following categories—
-"visual and performing arts and communications technologies", "humanities", "social and behavioural sciences and law”,  "business management and public administration", "physical and life sciences and technologies", "mathematics computer and information sciences", "architecture engineering and related technologies", "agriculture natural resources and conservation" and "personal protective and transportation services". The question we want to answer is if residents' academic backgrounds are associated with the amount of a neighbourhood's median total household income. The question is relevant because education is deemed as an essential tool for social mobility. Academic majors are a large factor for people's occupations and their associated earning. Results indicate that certain college majors are associated with neighbourhoods' household income [blablabla].
+"visual and performing arts and communications technologies", "humanities", "social and behavioural sciences and law”,  "business_management_and_public_administration", "physical and life sciences and technologies", "mathematics computer and information sciences", "architecture engineering and related technologies", "agriculture natural resources and conservation", "personal protective and transportation services" and "no postsecondary certificate diploma or degree”. The question we want to answer is [the question]. [Broader context: education as social mobility]
 
 ```{r echo=FALSE, include=FALSE, message=FALSE}
 #Set working Directory
 #setwd("~/Experimental Design for Data Science/ProblemSet2")
+
 # Search packages (this returns a table)
 neighbourhood_packages <- search_packages("Neighbourhood")
 # Filter the neighbourhood demographic dataset
 neighbourhood_demographics_package<- neighbourhood_packages %>%
   filter(title == "Neighbourhood Profiles")
+
 #Create main dataset for year 2011 
 main_df_2011 <-  neighbourhood_demographics_package %>% # Start with the package 
   list_package_resources() %>% # List the resources in the package
   filter(name == "Neighbourhood Data 2001, 2006, 2011.xlsx") %>% # Only keep the resource we want 
   get_resource()
-```
 
+### GEO-LOCATION DATASET TORONTO BY NEIGHBOURHOODS ###
+
+# get package
+package <- show_package("4def3f65-2a65-4a4f-83c4-b2a4aed72d46")
+package
+
+# get all resources for this package
+resources <- list_package_resources("4def3f65-2a65-4a4f-83c4-b2a4aed72d46")
+
+# identify datastore resources; by default, Toronto Open Data sets datastore resource format to CSV for non-geospatial and GeoJSON for geospatial resources
+datastore_resources <- filter(resources, tolower(format) %in% c('csv', 'geojson'))
+
+# load the first datastore resource as a sample
+geo_data <- filter(datastore_resources, row_number()==1) %>% get_resource()
+
+```
 
 # Dataset and method descriptiion
 City of Toronto Neighbourhood Profiles dataet is sourced from a number of Census tables released by Statistics Canada every five years. The dataset uses this Census data to provide a portrait of the demographic, social and economic characteristics of the people and households in each City of Toronto neighbourhood. Each data point in this file is presented for the City's 140 neighbourhoods, as well as for the City of Toronto as a whole. 
 
-Exploratory data analysis is conducted to obtain insight from the dataset. The variables we are interested in are median total household income and the academic fields the residents major or majored in. We would like to see if certain academic majors are more common or least common in different neighbourdhoods distinced by income. 
+Exploratory data analysis is conducted to obtain insight from the dataset. The variables we are interested in are median total household income and the academic fields the residents major or majored in. We would like to see if certain academic majors are more common or least common in different neighbourdhoods distinced by income. [Methods: map, lm, comparison...]
 
 
 ## Limitation of the dataset and approach
-Although there are datasets for 2001,2006, 2011 and 2016, the structure and available information of the datasets are inconsistent. For example, median total household income for all neighbourhood is only available in the dataset from 2011, therefore this study is limited to the year of 2011 and is unable to provide comparison between Census years regarding the changes in income and education profile of the neighbourhoods. 
-
-We are also not able to find out the income distribution with academic fields. Therefore, earnings differences linking to differences in residents’ fields of study is not included in our analysis. This prevents from knowing if certain academic majors are larger contributors to the neighbourhoods' total household income.
+Although there are datasets for 2001,2006, 2011 and 2016, the structure and available information of the datasets are inconsistent. For example, median total household income for all neighbourhood is only available in the dataset from 2011, therefore this study is limited to the year of 2011 and is unable to provide comparison between Census years regarding the changes in income and education profile of the neighbourhoods.
 
 ## Ethical considerations
-Population percentage in certain majors have correlations with median household income in the 140 neighbourhoods. For example, higher income neighbourhoods have more percentage of business majors, and lower income neighbourhoods have more percentage of transportation majors. This observation, without further anaylysis, potentially project social status and ranking among academic fields. 
-
+By revealing the [...]
+Stereotypes 
+Discriminations 
+Transportation
+Ranking of academic fields by the associated, 
 
 ```{r echo=FALSE, include=FALSE, message=FALSE}
 ##### Distribution by education 2011####
@@ -134,18 +157,62 @@ inco_df_2011_reshaped <- janitor::clean_names(inco_df_2011_reshaped)
 #Reorder columns
 inco_df_2011_reshaped <- select(inco_df_2011_reshaped, neighbourhoods, median_household_total_income)
 ```
+```{r}
+### Cleaning geo-location dataset
+clean_geo_data <- janitor::clean_names(geo_data)
 
+clean_geo_data <- extract(clean_geo_data, area_name, into = "neighbourhoods" , regex = "([^(0-9)]+)")
+
+
+clean_geo_data["neighbourhoods"] <- 
+  janitor::make_clean_names(as.matrix(clean_geo_data["neighbourhoods"]))
+
+clean_geo_data <- janitor::clean_names(clean_geo_data)
+
+clean_geo_data <- select(clean_geo_data, neighbourhoods, longitude, latitude, geometry)
+
+
+filter(clean_geo_data, neighbourhoods %in% c("mimico","weston_pellam_park"))
+
+clean_geo_data["neighbourhoods"][c(17,67),] <- c("mimico_includes_humber_bay_shores","weston_pelham_park")
+
+clean_geo_data
+
+```
 # Income and Education by Major 2011
+
 
 ```{r echo=FALSE, include=FALSE, message=FALSE}
 #Merge income and education 2011
 merged_df <- merge(edu_df_2011_reshaped, inco_df_2011_reshaped, by = 'neighbourhoods')
+merged_df <- merge(merged_df, clean_geo_data, by = 'neighbourhoods', all.x = TRUE)
+
+#Create a sf version
+sf_merged_df <- st_sf(merged_df, sf_column_name = "geometry")
+colnames(sf_merged_df) <- c("neighbourhoods" ,
+"no_certificate" ,
+"education" ,
+"arts_&_com",
+"humanities" ,
+"social_&_law" ,
+"business" ,
+"physical_&_life" ,
+"mathematics_&_it" ,
+"architecture_engin" ,
+"agriculture" ,
+"health" ,
+"transportation" ,
+"other" ,
+"median_income",
+"longitude",                                                 
+"latitude",                                                                                  "geometry")
 colnames(merged_df)
 ```
 ```{r echo=FALSE, include=TRUE, message=FALSE, fig.height = 6, fig.width = 9}
 ### Explore relationship between income and every major percentage ###
-#Create a new dataframe and change column names
-education_percentage_only <- merged_df
+
+#Create a new dataframe and change column names. Remove last three columns
+education_percentage_only <- merged_df[,1:(length(merged_df)-3)]
 colnames(education_percentage_only) <- c("neighbourhoods" ,
 "no_certificate" ,
 "education" ,
@@ -206,7 +273,7 @@ data_plot_highest %>%
   geom_col()+
   ylim(0,.3)+
   scale_x_discrete(
-        labels=c("Agri", "Arch", "Art", "Bus","Edu", "Health", "Hum","Math","No Cert", "Phys","Social", "Tran"))+
+        labels=c("Agri", "Arch", "Art", "Bus","Edu", "Health", "Hum","Math", "Phys","Social", "Tran"))+
   labs(title = "Highest Income Neighbourhood by Major", x = "Major", 
        y = "Distribution (%)")
 ```
@@ -225,7 +292,34 @@ data_plot_highest %>%
   geom_col()+
   ylim(0,.3)+
   scale_x_discrete(
-        labels=c("Agri", "Arch", "Art", "Bus","Edu", "Health", "Hum","Math", "No Cert", "Phys","Social", "Tran"))+
+        labels=c("Agri", "Arch", "Art", "Bus","Edu", "Health", "Hum","Math", "Phys","Social", "Tran"))+
   labs(title = "Lowest Income Neighbourhood by Major", x = "Major", 
        y = "Distribution (%)")
+```
+
+```{r echo=FALSE, include=TRUE, message=FALSE, fig.height = 5, fig.width = 9, warning=FALSE}
+#Plot Business
+tmap_mode("plot")
+tm_shape(sf_merged_df) +
+  tm_polygons(col = "business")
+
+#Plot all majors
+tmap_mode("plot")
+tm_shape(sf_merged_df) +
+tm_layout(legend.show = TRUE, legend.position = c("right", "bottom"), title.size = 2) +
+  tm_polygons(c("no_certificate" ,
+"education" ,
+"arts_&_com",
+"humanities" ,
+"social_&_law" ,
+"business" ,
+"physical_&_life" ,
+"mathematics_&_it" ,
+"architecture_engin" ,
+"agriculture" ,
+"health" ,
+"transportation"), palette = "RdYlBu") +
+  tm_facets(sync = TRUE, ncol = 4)
+
+
 ```
