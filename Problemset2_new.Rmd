@@ -3,7 +3,7 @@ title: "ProblemSet2_new"
 author: "Ke-li Chiu & Diego Mamanche Castellanos"
 date: "06/02/2020"
 output: pdf_document
-abstract: "Abstract nnnnn nnnnnn"
+abstract: "High levels of education, the common characteristics of those who live in Bridle Path-Sunnybrook-York Mills, Toronto's neighbourhood found as the one with the highest median income. By using Toronto's open data, this paper illustrates the education level distribution of the highest and lowest neighbourhood in terms of household income. It is important to understand these distributions because it exposes an alarming income inequality, that can be associated with the education level in each family."
 ---
 
 ```{r setup, include=FALSE}
@@ -12,7 +12,6 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r echo=FALSE, include=FALSE, message=FALSE}
 #Set up the environment
-
 library(opendatatoronto)
 library(dplyr)
 library(tidyr)
@@ -20,20 +19,19 @@ library(tidyverse)
 library(ggplot2)
 library(knitr)
 library(data.table) #Useful to transponse a dataframe
-
 ```
 
-
+# Introduction
+Education is a contributor to many beneficial socio-economic outcomes. In the previous study where we examined the educational profile of Toronto’s neighbourhoods, we found that the neighbourhood with the highest median household income has a much higher attainment rate (45%) of higher education above a bachelor’s degree than the compared with the lowest (23%) and the City of Toronto (27%). In this study, we extend the examination of educational profile to the residents’ academic majors in the following categories—
+"visual and performing arts and communications technologies", "humanities", "social and behavioural sciences and law”,  "business_management_and_public_administration", "physical and life sciences and technologies", "mathematics computer and information sciences", "architecture engineering and related technologies", "agriculture natural resources and conservation", "personal protective and transportation services" and "no postsecondary certificate diploma or degree”. The question we want to answer is [the question]. [Broader context: education as social mobility]
 ```{r echo=FALSE, include=FALSE, message=FALSE}
 #Set working Directory
 #setwd("~/Experimental Design for Data Science/ProblemSet2")
-
 # Search packages (this returns a table)
 neighbourhood_packages <- search_packages("Neighbourhood")
 # Filter the neighbourhood demographic dataset
 neighbourhood_demographics_package<- neighbourhood_packages %>%
   filter(title == "Neighbourhood Profiles")
-
 #Create main dataset for year 2011 
 main_df_2011 <-  neighbourhood_demographics_package %>% # Start with the package 
   list_package_resources() %>% # List the resources in the package
@@ -42,46 +40,42 @@ main_df_2011 <-  neighbourhood_demographics_package %>% # Start with the package
 ```
 
 
-# Education Dataset 2011
+# Dataset descriptiion
+Characteristics of the dataset.
+
+## Limitation of the dataset and approach
+Limitation of the dataset and approach
+
+## Ethical considerations
 
 ```{r echo=FALSE, include=FALSE, message=FALSE}
 ##### Distribution by education 2011####
-
-
 #Select sheet 2011
 clean_header_df_2011 <- main_df_2011$`2011`
 #Clean header using janitor
 clean_header_df_2011 <- janitor::clean_names(clean_header_df_2011)
-
 #Select only Education by major from the main dataset 
 education_df_2011 <- filter(clean_header_df_2011, category == "Education" & topic == "Major field of study - Classification of Instructional Programs (CIP)")
-
 # Remove row with the totals 
 education_df_2011 <-
   education_df_2011 %>% 
     filter(!str_detect(attribute, "Total"))
-
 #Remove first two columns 
 education_df_2011 <- education_df_2011[,3:length(education_df_2011)]
-
 #Change class of columns containing numbers as.numeric 
 education_df_2011[,2:length(education_df_2011)] <- sapply(education_df_2011[,2:length(education_df_2011)], function(x) as.numeric(x))
-
 ```
 ```{r echo=FALSE, include=FALSE, message=FALSE}
 #Create new dataframe
 scaled_education_df_2011 <- education_df_2011
-
 #Scale dataframe by column
 scaled_education_df_2011 <-
   scaled_education_df_2011 %>%
     janitor::adorn_percentages(denominator = "col")
-
 #Round new sclaes to 3 digits
 scaled_education_df_2011 <-
   scaled_education_df_2011 %>%
     janitor::adorn_rounding(digits = 3)
-
 #Transform the result to dataframe
 scaled_education_df_2011 <- as.data.frame(scaled_education_df_2011)
 ```
@@ -92,63 +86,45 @@ col_names_2011 <- col_names_2011[2:nrow(col_names_2011),]
 col_names_2011 <- as.data.frame(col_names_2011)
 colnames(col_names_2011) <- "neighbourhoods"
 col_names_2011
-
 #Reshape dataframe
 edu_df_2011_reshaped <- transpose(scaled_education_df_2011, make.names=1)
-
 #Include neighbourhoods column
 edu_df_2011_reshaped <- mutate(edu_df_2011_reshaped, neighbourhoods = col_names_2011$neighbourhoods)
-
 #Clean header names
 edu_df_2011_reshaped <- janitor::clean_names(edu_df_2011_reshaped)
-
 #Reorder columns
 edu_df_2011_reshaped <- select(edu_df_2011_reshaped, neighbourhoods, no_postsecondary_certificate_diploma_or_degree:other_fields_of_study)
 ```
 
-# Income dataset 2011
 
 ```{r echo=FALSE, include=FALSE, message=FALSE}
 ##### Distribution by income 2011####
-
-
 #Select sheet 2011
 clean_income_df_2011 <- main_df_2011$`2011`
-
 #Clean header using janitor
 clean_income_df_2011 <- janitor::clean_names(clean_income_df_2011)
-
 #Select only median income from the main dataset 
 income_df_2011 <- clean_income_df_2011[756,]
-
 #Remove first two columns 
 income_df_2011 <- income_df_2011[,3:length(income_df_2011)]
-
 #Change class of columns containing numbers as.numeric 
 income_df_2011[,2:length(income_df_2011)] <- sapply(income_df_2011[,2:length(income_df_2011)], function(x) as.numeric(x))
-
 ```
 ```{r echo=FALSE, include=FALSE, message=FALSE}
 #Create new dataframe
 col_names_2011_income  <- as.data.frame(colnames(income_df_2011))
-
 #Save neighbourhoods into a dataframe
 col_names_2011_income <- col_names_2011_income[2:nrow(col_names_2011_income),]
 col_names_2011_income <- as.data.frame(col_names_2011_income)
 colnames(col_names_2011_income) <- "neighbourhoods"
-
 #Reshape dataframe
 inco_df_2011_reshaped <- transpose(income_df_2011, make.names=1)
-
 #Include neighbourhoods column
 inco_df_2011_reshaped <- mutate(inco_df_2011_reshaped, neighbourhoods = col_names_2011_income$neighbourhoods)
-
 #Clean header names
 inco_df_2011_reshaped <- janitor::clean_names(inco_df_2011_reshaped)
-
 #Reorder columns
 inco_df_2011_reshaped <- select(inco_df_2011_reshaped, neighbourhoods, median_household_total_income)
-
 ```
 
 # Income and Education by Major 2011
@@ -160,7 +136,6 @@ colnames(merged_df)
 ```
 ```{r echo=FALSE, include=TRUE, message=FALSE, fig.height = 6, fig.width = 9}
 ### Explore relationship between income and every major percentage ###
-
 #Create a new dataframe and change column names
 education_percentage_only <- merged_df
 colnames(education_percentage_only) <- c("neighbourhoods" ,
@@ -178,7 +153,6 @@ colnames(education_percentage_only) <- c("neighbourhoods" ,
 "transportation" ,
 "other" ,
 "median_income")
-
 #Plot each major in terms of income (y) and neighbourhood participation in each major (x)
 education_percentage_only %>%
   gather(-c(median_income, neighbourhoods), key = "var", value = "value") %>% 
@@ -192,22 +166,18 @@ education_percentage_only %>%
 
 ```{r echo=FALSE, include=TRUE, message=FALSE, fig.height = 5, fig.width = 9}
 ### Business major seem to have a stiff line, lets zoom in to it ###
-
 # Get highest 5 and lowest 5 income values
 income <- education_percentage_only$median_income
 h5th <- sort(income)[length(income)-4]
 l5th <- sort(income)[5]
-
 # Assign income labels to the neighbourhoods
 education_percentage_only$range<-ifelse(income >= h5th,"top 5",
 		ifelse(income <= l5th,"bottom 5","rest"
 		))
-
 # Plot business major by income and neighbourhood distribution
 ggplot(education_percentage_only, aes(x=business, y=median_income, color=range)) +        geom_point() + 
     labs(title = "Business Major by Income", x = "Distribution by Major (%)", 
        y = "Median Income")
-
 # Run linear regression model
 linearMod <- lm(business ~ median_income, data=education_percentage_only)
 summary(linearMod)
@@ -216,14 +186,12 @@ summary(linearMod)
 
 ```{r echo=FALSE, include=TRUE, message=FALSE, fig.height = 4, fig.width = 9}
 ### Analizing the highest income neighbourhood ###
-
 # Plot major percentage distribution in highest income neighbourhood
 education_df_highest <- education_percentage_only %>%
   filter(median_income == max(median_income) )
 data_plot_highest <- 
   education_df_highest %>% 
   pivot_longer(cols = "education":"transportation", names_to = "major")
-
 # Make a bar chart
 data_plot_highest %>% 
   ggplot(aes(x = major, y = value, fill = major)) +
@@ -237,14 +205,12 @@ data_plot_highest %>%
 
 ```{r echo=FALSE, include=TRUE, message=FALSE, fig.height = 4, fig.width = 9}
 ### Analizing the lowest income neighbourhood ###
-
 # Plot major percentage distribution in lowest income neighbourhood
 education_df_highest <- education_percentage_only %>%
   filter(median_income == min(median_income) )
 data_plot_highest <- 
   education_df_highest %>% 
   pivot_longer(cols = "education":"transportation", names_to = "major")
-
 # Make a bar chart
 data_plot_highest %>% 
   ggplot(aes(x = major, y = value, fill = major)) +
