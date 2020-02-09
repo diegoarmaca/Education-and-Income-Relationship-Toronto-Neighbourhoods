@@ -105,13 +105,13 @@ scaled_education_df_2011 <-
     janitor::adorn_percentages(denominator = "col")
 
 
-#Multiply by  
-scaled_education_df_2011[,2:length(education_df_2011)] <- sapply(education_df_2011[,2:length(education_df_2011)], function(x) as.numeric(x))
+#Multiply by 100
+scaled_education_df_2011[,2:length(education_df_2011)] <- sapply(scaled_education_df_2011[,2:length(scaled_education_df_2011)], function(x) (x*100))
 
 #Round new sclaes to 3 digits
 scaled_education_df_2011 <-
   scaled_education_df_2011 %>%
-    janitor::adorn_rounding(digits = 3)
+    janitor::adorn_rounding(digits = 2)
 
 #Transform the result to dataframe
 scaled_education_df_2011 <- as.data.frame(scaled_education_df_2011)
@@ -277,7 +277,7 @@ data_plot_highest <-
 data_plot_highest %>% 
   ggplot(aes(x = major, y = value, fill = major)) +
   geom_col()+
-  ylim(0,.3)+
+  ylim(0,30)+
   scale_x_discrete(
         labels=c("Agri", "Arch", "Art", "Bus","Edu", "Health", "Hum","Math", "Phys","Social", "Tran"))+
   labs(title = "Highest Income Neighbourhood by Major", x = "Major", 
@@ -296,7 +296,7 @@ data_plot_highest <-
 data_plot_highest %>% 
   ggplot(aes(x = major, y = value, fill = major)) +
   geom_col()+
-  ylim(0,.3)+
+  ylim(0,30)+
   scale_x_discrete(
         labels=c("Agri", "Arch", "Art", "Bus","Edu", "Health", "Hum","Math", "Phys","Social", "Tran"))+
   labs(title = "Lowest Income Neighbourhood by Major", x = "Major", 
