@@ -41,16 +41,20 @@ main_df_2011 <-  neighbourhood_demographics_package %>% # Start with the package
 
 
 # Dataset and method descriptiion
-Neighbourhood profile dataset is...
-Exploratory data analysis is conducted to inspect the dataset.
+City of Toronto Neighbourhood Profiles dataet is sourced from a number of Census tables released by Statistics Canada every five years. The dataset uses this Census data to provide a portrait of the demographic, social and economic characteristics of the people and households in each City of Toronto neighbourhood. Each data point in this file is presented for the City's 140 neighbourhoods, as well as for the City of Toronto as a whole. 
+
+Exploratory data analysis is conducted to obtain insight from the dataset. The variables we are interested in are median total household income and the academic fields the residents major or majored in. We would like to see if certain academic majors are more common or least common in different neighbourdhoods distinced by income. [Methods: map, lm, comparison...]
 
 
 ## Limitation of the dataset and approach
-Although there are datasets for 2001,2006, 2011 and 2016, the structure and available information of the datasets are inconsistent. For example, median total household income for all neighbourhood is only available in the dataset from 2011, therefore this study is limited to the year of 2011 and is unable to provide time-series analysis of the changes in income and education profile of the neighbourhoods. 
+Although there are datasets for 2001,2006, 2011 and 2016, the structure and available information of the datasets are inconsistent. For example, median total household income for all neighbourhood is only available in the dataset from 2011, therefore this study is limited to the year of 2011 and is unable to provide comparison between Census years regarding the changes in income and education profile of the neighbourhoods.
 
 ## Ethical considerations
 By revealing the [...]
-Value judgement between academic fields, 
+Stereotypes 
+Discriminations 
+Transportation
+Ranking of academic fields by the associated, 
 
 ```{r echo=FALSE, include=FALSE, message=FALSE}
 ##### Distribution by education 2011####
