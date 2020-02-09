@@ -158,7 +158,7 @@ inco_df_2011_reshaped <- select(inco_df_2011_reshaped, neighbourhoods, median_ho
 merged_df <- merge(edu_df_2011_reshaped, inco_df_2011_reshaped, by = 'neighbourhoods')
 colnames(merged_df)
 ```
-```{r echo=FALSE, include=TRUE, message=FALSE}
+```{r echo=FALSE, include=TRUE, message=FALSE, fig.height = 6, fig.width = 9}
 ### Explore relationship between income and every major percentage ###
 
 #Create a new dataframe and change column names
@@ -190,7 +190,7 @@ education_percentage_only %>%
        y = "Median Income")
 ```
 
-```{r echo=FALSE, include=TRUE, message=FALSE}
+```{r echo=FALSE, include=TRUE, message=FALSE, fig.height = 5, fig.width = 9}
 ### Business major seem to have a stiff line, lets zoom in to it ###
 
 # Get highest 5 and lowest 5 income values
@@ -214,7 +214,7 @@ summary(linearMod)
 ```
 
 
-```{r echo=FALSE, include=TRUE, message=FALSE}
+```{r echo=FALSE, include=TRUE, message=FALSE, fig.height = 4, fig.width = 9}
 ### Analizing the highest income neighbourhood ###
 
 # Plot major percentage distribution in highest income neighbourhood
@@ -234,7 +234,7 @@ data_plot_highest %>%
        y = "Distribution (%)")
 ```
 
-```{r echo=FALSE, include=TRUE, message=FALSE}
+```{r echo=FALSE, include=TRUE, message=FALSE, fig.height = 4, fig.width = 9}
 ### Analizing the lowest income neighbourhood ###
 
 # Plot major percentage distribution in lowest income neighbourhood
