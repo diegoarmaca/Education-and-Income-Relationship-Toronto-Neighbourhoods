@@ -20,12 +20,9 @@ library(tidyverse)
 library(ggplot2)
 library(knitr)
 library(data.table) #Useful to transponse a dataframe
-#install.packages("treemapify")
-library(treemapify)
-#install.packages("CAinterprTools")
-library(CAinterprTools)
 
 ```
+
 
 ```{r}
 #Set working Directory
@@ -51,6 +48,7 @@ main_df_2011 <-  neighbourhood_demographics_package %>% # Start with the package
   get_resource()
 ```
 
+
 ```{r}
 #Create main dataset for year 2016 
 main_df_2016 <-  neighbourhood_demographics_package %>% # Start with the package 
@@ -59,84 +57,7 @@ main_df_2016 <-  neighbourhood_demographics_package %>% # Start with the package
   get_resource()
 ```
 
-# First Dataset
-
-```{r}
-##### Distribution by education 2016####
-
-#Filter education per neighbourhood
-neighbourhood_columns_2016 <- main_df_2016[1:2, ]
-neighbourhood_columns_2016 <- janitor::clean_names(neighbourhood_columns_2016)
-neighbourhood_columns_2016
-
-no_header_df_2016 <- main_df_2016[3:nrow(main_df_2016),]
-no_header_df_2016 <- janitor::clean_names(no_header_df_2016)
-no_header_df_2016
-
-education_df_2016 <- filter(no_header_df_2016, category == "Education" & topic == "Major field of study - Classification of Instructional Programs (CIP) 2016")
-names(education_df_2016)[names(education_df_2016) == "_id"] <- "id"
-
-
-edu_25_64 <- filter(education_df_2016, characteristic == "Total - Major field of study - Classification of Instructional Programs (CIP) 2016 for the population aged 25 to 64 years in private households - 25% sample data")
-
-education_df_2016 <- filter(education_df_2016, id < as.numeric(edu_25_64["id"]))
-
-
-education_df_2016["characteristic"]
-
-education_df_2016 <-
-  education_df_2016 %>% 
-    filter(!str_detect(characteristic, "^([ ]+[0-9]|Total)"))
-
-education_df_2016 <- education_df_2016[,5:length(education_df_2016)]
-education_df_2016
-
-education_df_2016[,2:length(education_df_2016)] <- sapply(education_df_2016[,2:length(education_df_2016)], function(x) as.numeric(x))
-education_df_2016
-
-
-education_df_2016
-
-```
-
-```{r}
-#Scale dataframe by column
-scaled_education_df_2016 <- education_df_2016
-
-scaled_education_df_2016 <-
-  scaled_education_df_2016 %>%
-    janitor::adorn_percentages(denominator = "col")
-
-scaled_education_df_2016 <-
-  scaled_education_df_2016 %>%
-    janitor::adorn_rounding(digits = 3)
-
-
-
-scaled_education_df_2016 <- as.data.frame(scaled_education_df_2016)
-```
-
-```{r}
-#Reshape dataframe
-col_names_2016 <- as.data.frame(colnames(scaled_education_df_2016))
-col_names_2016 <- col_names_2016[2:nrow(col_names_2016),]
-col_names_2016 <- as.data.frame(col_names_2016)
-colnames(col_names_2016) <- "neighbourhoods"
-col_names_2016
-
-edu_df_2016_reshaped <- transpose(scaled_education_df_2016, make.names=1)
-edu_df_2016_reshaped
-
-edu_df_2016_reshaped <- mutate(edu_df_2016_reshaped, neighbourhoods = col_names_2016$neighbourhoods)
-
-edu_df_2016_reshaped <- janitor::clean_names(edu_df_2016_reshaped)
-
-edu_df_2016_reshaped <- select(edu_df_2016_reshaped, neighbourhoods, no_postsecondary_certificate_diploma_or_degree:other)
-
-edu_df_2016_reshaped
-```
-
-#Second Dataset 2011
+#Education Dataset 2011
 
 ```{r}
 ##### Distribution by education 2011####
@@ -200,7 +121,132 @@ edu_df_2011_reshaped <- select(edu_df_2011_reshaped, neighbourhoods, no_postseco
 edu_df_2011_reshaped
 ```
 
-```{r}
-?gather(edu_df_2011_reshaped, )
+# Income dataset 2011
 
+```{r}
+##### Distribution by income 2011####
+
+
+#Select sheet 2011
+clean_income_df_2011 <- main_df_2011$`2011`
+
+clean_income_df_2011 <- janitor::clean_names(clean_income_df_2011)
+
+income_df_2011 <- clean_income_df_2011[756,]
+
+income_df_2011 <- income_df_2011[,3:length(income_df_2011)]
+
+income_df_2011[,2:length(income_df_2011)] <- sapply(income_df_2011[,2:length(income_df_2011)], function(x) as.numeric(x))
+
+
+income_df_2011
+```
+
+```{r}
+#Reshape dataframe
+col_names_2011_income  <- as.data.frame(colnames(income_df_2011))
+col_names_2011_income <- col_names_2011_income[2:nrow(col_names_2011_income),]
+col_names_2011_income <- as.data.frame(col_names_2011_income)
+colnames(col_names_2011_income) <- "neighbourhoods"
+col_names_2011_income
+
+inco_df_2011_reshaped <- transpose(income_df_2011, make.names=1)
+inco_df_2011_reshaped
+
+inco_df_2011_reshaped <- mutate(inco_df_2011_reshaped, neighbourhoods = col_names_2011_income$neighbourhoods)
+
+inco_df_2011_reshaped <- janitor::clean_names(inco_df_2011_reshaped)
+
+inco_df_2011_reshaped <- select(inco_df_2011_reshaped, neighbourhoods, median_household_total_income)
+
+inco_df_2011_reshaped
+```
+
+# Income and Education by Major 2011
+
+```{r}
+#Merge income and education 2011
+merged_df <- merge(edu_df_2011_reshaped, inco_df_2011_reshaped, by = 'neighbourhoods')
+colnames(merged_df)
+```
+```{r}
+# Explore relationship between income and every major perecntage
+education_percentage_only <- merged_df
+colnames(education_percentage_only) <- c("neighbourhoods" ,
+"no_certificate" ,
+"education" ,
+"arts_&_com",
+"humanities" ,
+"social_&_law" ,
+"business" ,
+"physical_&_life" ,
+"mathematics_&_it" ,
+"architecture_engin" ,
+"agriculture" ,
+"health" ,
+"transportation" ,
+"other" ,
+"median_income")
+education_percentage_only %>%
+  gather(-c(median_income, neighbourhoods), key = "var", value = "value") %>% 
+  ggplot(aes(x = value, y = median_income)) +
+    facet_wrap(~ var, scales = "fixed") +
+    geom_point(shape=20, color="blue", size=1) +
+    stat_smooth(method=lm, se=FALSE,  colour="red") +
+    labs(title = "Major by Income", x = "Neighbourhood Distribution by Major (%)", 
+       y = "Median Income")
+```
+
+```{r}
+# Business major seem to have a stiff line, lets zoom in to it
+# Get highest 5 and lowest 5 income values
+income <- education_percentage_only$median_income
+h5th <- sort(income)[length(income)-4]
+l5th <- sort(income)[5]
+# Assign income labels to the neighbourhoods
+education_percentage_only$range<-ifelse(income >= h5th,"top 5",
+		ifelse(income <= l5th,"bottom 5","rest"
+		))
+# Plot it
+ggplot(education_percentage_only, aes(x=business, y=median_income, color=range)) +        geom_point() + 
+    labs(title = "Business Major by Income", x = "Distribution by Major (%)", 
+       y = "Median Income")
+# Linear regression model
+linearMod <- lm(business ~ median_income, data=education_percentage_only)
+summary(linearMod)
+```
+
+
+```{r}
+# Plot major percentage distribution in highest income neighbourhood
+education_df_highest <- education_percentage_only %>%
+  filter(median_income == max(median_income) )
+data_plot_highest <- 
+  education_df_highest %>% 
+  pivot_longer(cols = "education":"transportation", names_to = "major")
+# Make a bar chart
+data_plot_highest %>% 
+  ggplot(aes(x = major, y = value, fill = major)) +
+  geom_col()+
+  scale_x_discrete(
+        labels=c("Agri", "Arch", "Art", "Bus","Edu", "Health", "Hum","Math", "Phys","Social", "Tran"))+
+  labs(title = "Highest Income Neighbourhood by Major", x = "Major", 
+       y = "Distribution (%)")
+```
+
+```{r}
+# Plot major percentage distribution in lowest income neighbourhood
+education_df_highest <- education_percentage_only %>%
+  filter(median_income == min(median_income) )
+data_plot_highest <- 
+  education_df_highest %>% 
+  pivot_longer(cols = "education":"transportation", names_to = "major")
+# Make a bar chart
+data_plot_highest %>% 
+  ggplot(aes(x = major, y = value, fill = major)) +
+  geom_col()+
+  scale_x_discrete(
+        labels=c("Agri", "Arch", "Art", "Bus","Edu", "Health", "Hum","Math", "Phys","Social", "Tran"))+
+  labs(title = "Lowest Income Neighbourhood by Major", x = "Major", 
+       y = "Distribution (%)")
 ```
