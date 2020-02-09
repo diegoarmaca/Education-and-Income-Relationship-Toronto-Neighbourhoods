@@ -228,6 +228,7 @@ data_plot_highest <-
 data_plot_highest %>% 
   ggplot(aes(x = major, y = value, fill = major)) +
   geom_col()+
+  ylim(0,.3)+
   scale_x_discrete(
         labels=c("Agri", "Arch", "Art", "Bus","Edu", "Health", "Hum","Math", "Phys","Social", "Tran"))+
   labs(title = "Highest Income Neighbourhood by Major", x = "Major", 
@@ -248,6 +249,7 @@ data_plot_highest <-
 data_plot_highest %>% 
   ggplot(aes(x = major, y = value, fill = major)) +
   geom_col()+
+  ylim(0,.3)+
   scale_x_discrete(
         labels=c("Agri", "Arch", "Art", "Bus","Edu", "Health", "Hum","Math", "Phys","Social", "Tran"))+
   labs(title = "Lowest Income Neighbourhood by Major", x = "Major", 
