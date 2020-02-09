@@ -40,13 +40,17 @@ main_df_2011 <-  neighbourhood_demographics_package %>% # Start with the package
 ```
 
 
-# Dataset descriptiion
-Characteristics of the dataset.
+# Dataset and method descriptiion
+Neighbourhood profile dataset is...
+Exploratory data analysis is conducted to inspect the dataset.
+
 
 ## Limitation of the dataset and approach
-Limitation of the dataset and approach
+Although there are datasets for 2001,2006, 2011 and 2016, the structure and available information of the datasets are inconsistent. For example, median total household income for all neighbourhood is only available in the dataset from 2011, therefore this study is limited to the year of 2011 and is unable to provide time-series analysis of the changes in income and education profile of the neighbourhoods. 
 
 ## Ethical considerations
+By revealing the [...]
+Value judgement between academic fields, 
 
 ```{r echo=FALSE, include=FALSE, message=FALSE}
 ##### Distribution by education 2011####
