@@ -16,8 +16,15 @@ knitr::opts_chunk$set(echo = TRUE)
 library(opendatatoronto)
 library(dplyr)
 library(tidyr)
+library(tidyverse)
 library(ggplot2)
 library(knitr)
+library(data.table) #Useful to transponse a dataframe
+#install.packages("treemapify")
+library(treemapify)
+#install.packages("CAinterprTools")
+library(CAinterprTools)
+
 ```
 
 ```{r}
@@ -52,7 +59,7 @@ main_df_2016 <-  neighbourhood_demographics_package %>% # Start with the package
   get_resource()
 ```
 
-
+# First Dataset
 
 ```{r}
 ##### Distribution by education 2016####
@@ -77,20 +84,123 @@ education_df_2016 <- filter(education_df_2016, id < as.numeric(edu_25_64["id"]))
 
 education_df_2016["characteristic"]
 
-education_df_2016 %>% 
-  filter(!str_detect(characteristic, "^([ ]+[0-9]|Total)"))
+education_df_2016 <-
+  education_df_2016 %>% 
+    filter(!str_detect(characteristic, "^([ ]+[0-9]|Total)"))
+
+education_df_2016 <- education_df_2016[,5:length(education_df_2016)]
+education_df_2016
+
+education_df_2016[,2:length(education_df_2016)] <- sapply(education_df_2016[,2:length(education_df_2016)], function(x) as.numeric(x))
+education_df_2016
 
 
 education_df_2016
+
 ```
 
+```{r}
+#Scale dataframe by column
+scaled_education_df_2016 <- education_df_2016
+
+scaled_education_df_2016 <-
+  scaled_education_df_2016 %>%
+    janitor::adorn_percentages(denominator = "col")
+
+scaled_education_df_2016 <-
+  scaled_education_df_2016 %>%
+    janitor::adorn_rounding(digits = 3)
+
+
+
+scaled_education_df_2016 <- as.data.frame(scaled_education_df_2016)
+```
 
 ```{r}
-# Explore relationship between income and every major perecntage
-education_df_2016 %>%
-  gather(-c(city_of_toronto, total_population.x), key = "numberhood_number", value = "value") %>%
-    ggplot(aes(x = value, y = as.numeric(median_household_total_income))) +
-    facet_wrap(~ numberhood_number, scales = "free") +
-    geom_point(shape=20, color="blue", size=1) +
-    stat_smooth(method=lm, se=FALSE)
+#Reshape dataframe
+col_names_2016 <- as.data.frame(colnames(scaled_education_df_2016))
+col_names_2016 <- col_names_2016[2:nrow(col_names_2016),]
+col_names_2016 <- as.data.frame(col_names_2016)
+colnames(col_names_2016) <- "neighbourhoods"
+col_names_2016
+
+edu_df_2016_reshaped <- transpose(scaled_education_df_2016, make.names=1)
+edu_df_2016_reshaped
+
+edu_df_2016_reshaped <- mutate(edu_df_2016_reshaped, neighbourhoods = col_names_2016$neighbourhoods)
+
+edu_df_2016_reshaped <- janitor::clean_names(edu_df_2016_reshaped)
+
+edu_df_2016_reshaped <- select(edu_df_2016_reshaped, neighbourhoods, no_postsecondary_certificate_diploma_or_degree:other)
+
+edu_df_2016_reshaped
+```
+
+#Second Dataset 2011
+
+```{r}
+##### Distribution by education 2011####
+
+
+#Select sheet 2011
+clean_header_df_2011 <- main_df_2011$`2011`
+
+clean_header_df_2011 <- janitor::clean_names(clean_header_df_2011)
+
+education_df_2011 <- filter(clean_header_df_2011, category == "Education" & topic == "Major field of study - Classification of Instructional Programs (CIP)")
+
+education_df_2011 <-
+  education_df_2011 %>% 
+    filter(!str_detect(attribute, "Total"))
+
+education_df_2011 <- education_df_2011[,3:length(education_df_2011)]
+
+education_df_2011[,2:length(education_df_2011)] <- sapply(education_df_2011[,2:length(education_df_2011)], function(x) as.numeric(x))
+education_df_2011
+
+
+education_df_2011
+
+```
+
+```{r}
+#Scale dataframe by column
+scaled_education_df_2011 <- education_df_2011
+
+scaled_education_df_2011 <-
+  scaled_education_df_2011 %>%
+    janitor::adorn_percentages(denominator = "col")
+
+scaled_education_df_2011 <-
+  scaled_education_df_2011 %>%
+    janitor::adorn_rounding(digits = 3)
+
+
+
+scaled_education_df_2011 <- as.data.frame(scaled_education_df_2011)
+```
+
+```{r}
+#Reshape dataframe
+col_names_2011 <- as.data.frame(colnames(scaled_education_df_2011))
+col_names_2011 <- col_names_2011[2:nrow(col_names_2011),]
+col_names_2011 <- as.data.frame(col_names_2011)
+colnames(col_names_2011) <- "neighbourhoods"
+col_names_2011
+
+edu_df_2011_reshaped <- transpose(scaled_education_df_2011, make.names=1)
+edu_df_2011_reshaped
+
+edu_df_2011_reshaped <- mutate(edu_df_2011_reshaped, neighbourhoods = col_names_2011$neighbourhoods)
+
+edu_df_2011_reshaped <- janitor::clean_names(edu_df_2011_reshaped)
+
+edu_df_2011_reshaped <- select(edu_df_2011_reshaped, neighbourhoods, no_postsecondary_certificate_diploma_or_degree:other_fields_of_study)
+
+edu_df_2011_reshaped
+```
+
+```{r}
+?gather(edu_df_2011_reshaped, )
+
 ```
