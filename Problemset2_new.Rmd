@@ -23,7 +23,8 @@ library(data.table) #Useful to transponse a dataframe
 
 # Introduction
 Education is a contributor to many beneficial socio-economic outcomes. In the previous study where we examined the educational profile of Toronto’s neighbourhoods, we found that the neighbourhood with the highest median household income has a much higher attainment rate (45%) of higher education above a bachelor’s degree than the compared with the lowest (23%) and the City of Toronto (27%). In this study, we extend the examination of educational profile to the residents’ academic majors in the following categories—
-"visual and performing arts and communications technologies", "humanities", "social and behavioural sciences and law”,  "business_management_and_public_administration", "physical and life sciences and technologies", "mathematics computer and information sciences", "architecture engineering and related technologies", "agriculture natural resources and conservation", "personal protective and transportation services" and "no postsecondary certificate diploma or degree”. The question we want to answer is [the question]. [Broader context: education as social mobility]
+"visual and performing arts and communications technologies", "humanities", "social and behavioural sciences and law”,  "business management and public administration", "physical and life sciences and technologies", "mathematics computer and information sciences", "architecture engineering and related technologies", "agriculture natural resources and conservation" and "personal protective and transportation services". The question we want to answer is if residents' academic backgrounds are associated with the amount of a neighbourhood's median total household income. The question is relevant because education is deemed as an essential tool for social mobility. Academic majors are a large factor for people's occupations and their associated earning. Results indicate that certain college majors are associated with neighbourhoods' household income [blablabla].
+
 ```{r echo=FALSE, include=FALSE, message=FALSE}
 #Set working Directory
 #setwd("~/Experimental Design for Data Science/ProblemSet2")
@@ -43,18 +44,17 @@ main_df_2011 <-  neighbourhood_demographics_package %>% # Start with the package
 # Dataset and method descriptiion
 City of Toronto Neighbourhood Profiles dataet is sourced from a number of Census tables released by Statistics Canada every five years. The dataset uses this Census data to provide a portrait of the demographic, social and economic characteristics of the people and households in each City of Toronto neighbourhood. Each data point in this file is presented for the City's 140 neighbourhoods, as well as for the City of Toronto as a whole. 
 
-Exploratory data analysis is conducted to obtain insight from the dataset. The variables we are interested in are median total household income and the academic fields the residents major or majored in. We would like to see if certain academic majors are more common or least common in different neighbourdhoods distinced by income. [Methods: map, lm, comparison...]
+Exploratory data analysis is conducted to obtain insight from the dataset. The variables we are interested in are median total household income and the academic fields the residents major or majored in. We would like to see if certain academic majors are more common or least common in different neighbourdhoods distinced by income. 
 
 
 ## Limitation of the dataset and approach
-Although there are datasets for 2001,2006, 2011 and 2016, the structure and available information of the datasets are inconsistent. For example, median total household income for all neighbourhood is only available in the dataset from 2011, therefore this study is limited to the year of 2011 and is unable to provide comparison between Census years regarding the changes in income and education profile of the neighbourhoods.
+Although there are datasets for 2001,2006, 2011 and 2016, the structure and available information of the datasets are inconsistent. For example, median total household income for all neighbourhood is only available in the dataset from 2011, therefore this study is limited to the year of 2011 and is unable to provide comparison between Census years regarding the changes in income and education profile of the neighbourhoods. 
+
+We are also not able to find out the income distribution with academic fields. Therefore, earnings differences linking to differences in residents’ fields of study is not included in our analysis. This prevents from knowing if certain academic majors are larger contributors to the neighbourhoods' total household income.
 
 ## Ethical considerations
-By revealing the [...]
-Stereotypes 
-Discriminations 
-Transportation
-Ranking of academic fields by the associated, 
+Population percentage in certain majors have correlations with median household income in the 140 neighbourhoods. For example, higher income neighbourhoods have more percentage of business majors, and lower income neighbourhoods have more percentage of transportation majors. This observation, without further anaylysis, potentially project social status and ranking among academic fields. 
+
 
 ```{r echo=FALSE, include=FALSE, message=FALSE}
 ##### Distribution by education 2011####
@@ -206,7 +206,7 @@ data_plot_highest %>%
   geom_col()+
   ylim(0,.3)+
   scale_x_discrete(
-        labels=c("Agri", "Arch", "Art", "Bus","Edu", "Health", "Hum","Math", "Phys","Social", "Tran"))+
+        labels=c("Agri", "Arch", "Art", "Bus","Edu", "Health", "Hum","Math","No Cert", "Phys","Social", "Tran"))+
   labs(title = "Highest Income Neighbourhood by Major", x = "Major", 
        y = "Distribution (%)")
 ```
@@ -225,7 +225,7 @@ data_plot_highest %>%
   geom_col()+
   ylim(0,.3)+
   scale_x_discrete(
-        labels=c("Agri", "Arch", "Art", "Bus","Edu", "Health", "Hum","Math", "Phys","Social", "Tran"))+
+        labels=c("Agri", "Arch", "Art", "Bus","Edu", "Health", "Hum","Math", "No Cert", "Phys","Social", "Tran"))+
   labs(title = "Lowest Income Neighbourhood by Major", x = "Major", 
        y = "Distribution (%)")
 ```
