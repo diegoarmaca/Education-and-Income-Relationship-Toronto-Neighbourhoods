@@ -103,10 +103,16 @@ scaled_education_df_2011 <- education_df_2011
 scaled_education_df_2011 <-
   scaled_education_df_2011 %>%
     janitor::adorn_percentages(denominator = "col")
+
+
+#Multiply by  
+scaled_education_df_2011[,2:length(education_df_2011)] <- sapply(education_df_2011[,2:length(education_df_2011)], function(x) as.numeric(x))
+
 #Round new sclaes to 3 digits
 scaled_education_df_2011 <-
   scaled_education_df_2011 %>%
     janitor::adorn_rounding(digits = 3)
+
 #Transform the result to dataframe
 scaled_education_df_2011 <- as.data.frame(scaled_education_df_2011)
 ```
@@ -321,5 +327,23 @@ tm_layout(legend.show = TRUE, legend.position = c("right", "bottom"), title.size
 "transportation"), palette = "RdYlBu") +
   tm_facets(sync = TRUE, ncol = 4)
 
+
+#Plot all majors without palette
+tmap_mode("plot")
+tm_shape(sf_merged_df) +
+tm_layout(legend.show = TRUE, legend.position = c("right", "bottom"), title.size = 2, title.position = c("center","center")) +
+  tm_polygons(c("no_certificate" ,
+"education" ,
+"arts_&_com",
+"humanities" ,
+"social_&_law" ,
+"business" ,
+"physical_&_life" ,
+"mathematics_&_it" ,
+"architecture_engin" ,
+"agriculture" ,
+"health" ,
+"transportation")) +
+  tm_facets(sync = TRUE, ncol = 4)
 
 ```
