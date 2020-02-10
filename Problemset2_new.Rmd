@@ -3,10 +3,7 @@ title: "ProblemSet2_new"
 author: "Ke-li Chiu & Diego Mamanche Castellanos"
 date: "06/02/2020"
 output: pdf_document
-abstract: "Education is a contributor to many beneficial socio-economic outcomes.
-  We intend to exam the education profile in the selected neighbourhoods of Toronto
-  that have polarized household income from the data set package *Wellbeing Toronto
-  - Demographics: NHS Indicators*. We first observe that the income gap between the"
+abstract: "Education is a contributor to many beneficial socio-economic outcomes. We intend to exam the the relationship between academic majors and household income in Toronto's neighbourhoods—can we find higher or lower percentage population in certain academic majors in higher or lower income neighbourhoods? The result shows that higher income neighbourhoods also have higher percentage of residents with majors in business, The data set is retrieved from the package *City of Toronto Neighbourhood Profiles* from the year 2011. ###### We intend to use the comparison to bring awareness of inequality in income and education existing in the City of Toronto."
 ---
 
 ```{r setup, include=FALSE}
@@ -26,61 +23,58 @@ library(sf)
 library(tmap)
 library(tmaptools)
 library(leaflet)
-
 ```
 
 # Introduction
-Education is a contributor to many beneficial socio-economic outcomes. In the previous study where we examined the educational profile of Toronto’s neighbourhoods, we found that the neighbourhood with the highest median household income has a much higher attainment rate (45%) of higher education above a bachelor’s degree than the compared with the lowest (23%) and the City of Toronto (27%). In this study, we extend the examination of educational profile to the residents’ academic majors in the following categories—
-"visual and performing arts and communications technologies", "humanities", "social and behavioural sciences and law”,  "business_management_and_public_administration", "physical and life sciences and technologies", "mathematics computer and information sciences", "architecture engineering and related technologies", "agriculture natural resources and conservation", "personal protective and transportation services" and "no postsecondary certificate diploma or degree”. The question we want to answer is [the question]. [Broader context: education as social mobility]
+Education is a contributor to many beneficial socio-economic outcomes. In this study, we intend to examine the relationship between household income and educational profile in terms of residents' academic majors in Toronto's 140 neighbourhoods. The majors are categorized as follows—
+"visual and performing arts and communications technologies," "humanities," "social and behavioural sciences and law," "business_management_and_public_administration," "physical and life sciences and technologies," "mathematics computer and information sciences," "architecture engineering and related technologies," "agriculture natural resources and conservation," "personal protective and transportation services" and "no postsecondary certificate diploma or degree." The question we want to answer is if we can find a higher population percentage in specific academic majors in higher-income neighbourhoods or vice versa? The question is relevant because the academic major is a significant factor for people's occupations and their associated earning; thus, it is deemed as an essential tool for social mobility. 
 
 ```{r echo=FALSE, include=FALSE, message=FALSE}
 #Set working Directory
 #setwd("~/Experimental Design for Data Science/ProblemSet2")
-
 # Search packages (this returns a table)
 neighbourhood_packages <- search_packages("Neighbourhood")
 # Filter the neighbourhood demographic dataset
 neighbourhood_demographics_package<- neighbourhood_packages %>%
   filter(title == "Neighbourhood Profiles")
-
 #Create main dataset for year 2011 
 main_df_2011 <-  neighbourhood_demographics_package %>% # Start with the package 
   list_package_resources() %>% # List the resources in the package
   filter(name == "Neighbourhood Data 2001, 2006, 2011.xlsx") %>% # Only keep the resource we want 
   get_resource()
-
 ### GEO-LOCATION DATASET TORONTO BY NEIGHBOURHOODS ###
-
 # get package
 package <- show_package("4def3f65-2a65-4a4f-83c4-b2a4aed72d46")
 package
-
 # get all resources for this package
 resources <- list_package_resources("4def3f65-2a65-4a4f-83c4-b2a4aed72d46")
-
 # identify datastore resources; by default, Toronto Open Data sets datastore resource format to CSV for non-geospatial and GeoJSON for geospatial resources
 datastore_resources <- filter(resources, tolower(format) %in% c('csv', 'geojson'))
-
 # load the first datastore resource as a sample
 geo_data <- filter(datastore_resources, row_number()==1) %>% get_resource()
-
 ```
 
 # Dataset and method descriptiion
-City of Toronto Neighbourhood Profiles dataet is sourced from a number of Census tables released by Statistics Canada every five years. The dataset uses this Census data to provide a portrait of the demographic, social and economic characteristics of the people and households in each City of Toronto neighbourhood. Each data point in this file is presented for the City's 140 neighbourhoods, as well as for the City of Toronto as a whole. 
+City of Toronto Neighbourhood Profiles data set is sourced from several Census tables released by Statistics Canada every five years. The dataset uses this Census data to provide a portrait of the demographic, social and economic characteristics of the people and households in each City of Toronto neighbourhood. Each data point in this file is presented for the City's 140 neighbourhoods, as well as for the City of Toronto as a whole. The data set consists of 144 columns for neighbourhoods and 1537 rows for characteristics of the neighbourhoods. Data cleaning and reshaping are performed to have a new data frame that has 14 characteristics regarding topics of income as columns and education and the 140 neighbourhoods as rows.
 
-Exploratory data analysis is conducted to obtain insight from the dataset. The variables we are interested in are median total household income and the academic fields the residents major or majored in. We would like to see if certain academic majors are more common or least common in different neighbourdhoods distinced by income. [Methods: map, lm, comparison...]
-
+Exploratory data analysis is conducted to obtain insight from the dataset. To get a picture of a neighbourhood's economic status, we look at the median total household income which divides the income distribution into two equal groups, half having income above that amount, and half having income below that amount. As for the education profile, the academic majors of the residents are the variables in which we are interested. Each field for the major is the number of people who took this major in the neighbourhood. To be able to compare the neighbourhood regardless of the difference in population, we turn the value to percentages by dividing the total population between 25 to 64 years old by the population in each major. 
 
 ## Limitation of the dataset and approach
-Although there are datasets for 2001,2006, 2011 and 2016, the structure and available information of the datasets are inconsistent. For example, median total household income for all neighbourhood is only available in the dataset from 2011, therefore this study is limited to the year of 2011 and is unable to provide comparison between Census years regarding the changes in income and education profile of the neighbourhoods.
+Because we chose to look at the median instead of the mean of household income, we are excluding the outliers in the income distribution. The median value would give us a more accurate picture of the neighbourhoods' economic status but also prohibit us from investigating further the outliers that are skewing the distributions. Moreover, although there are datasets for 2001,2006, 2011 and 2016, the structure and available information of the datasets are inconsistent. For example, median total household income for all neighbourhoods is only available in the dataset from 2011; therefore, this study is limited to the year 2011 and is unable to provide a comparison between Census years regarding the changes in income and education profile of the neighbourhoods. Finally, we are also not able to find out the income distribution by academic fields. Therefore, earnings differences linking to differences in residents' fields of study are not included in our analysis. This prevents from knowing if specific academic majors are more significant contributors to the neighbourhoods' total household income.
 
 ## Ethical considerations
-By revealing the [...]
-Stereotypes 
-Discriminations 
-Transportation
-Ranking of academic fields by the associated, 
+Population percentage in specific majors have correlations with median household income in the 140 neighbourhoods. For example, higher income neighbourhoods have more percentage of business majors, and lower income neighbourhoods have more percentage of transportation majors. This observation, without further anaylysis, potentially projects social status and ranking among academic fields. 
+
+# Income distribution map
+Darker areas in the above map indicate high levels of unemployment, while lighter areas indicate low levels of unemployment. As Figure 1 shows, we observe that higher income neighbourhoods tend to be in the central part of Toronto, neighbouring each other.
+
+# Correlation between income and academic majors
+We conducted a correlation matrix table to see if certain majors have correlation with household income. As a result, we find that business, education, and [sss] have stronger positive correlations, which no certificate has strong negative correlation. 
+
+# Majors distribution map
+The four categories that have the largest correlation scores are plotted into choropleth maps to be compared with Figure 1. The distribution of business, education and asfd have the similar pattern with 
+
+# Comparison between polarized neighbourhoods and the City of Toronto
 
 ```{r echo=FALSE, include=FALSE, message=FALSE}
 ##### Distribution by education 2011####
@@ -106,16 +100,12 @@ scaled_education_df_2011 <- education_df_2011
 scaled_education_df_2011 <-
   scaled_education_df_2011 %>%
     janitor::adorn_percentages(denominator = "col")
-
-
 #Multiply by 100
 scaled_education_df_2011[,2:length(education_df_2011)] <- sapply(scaled_education_df_2011[,2:length(scaled_education_df_2011)], function(x) (x*100))
-
 #Round new scales to 2 digits
 scaled_education_df_2011 <-
   scaled_education_df_2011 %>%
     janitor::adorn_rounding(digits = 2)
-
 #Transform the result to dataframe
 scaled_education_df_2011 <- as.data.frame(scaled_education_df_2011)
 ```
@@ -169,24 +159,14 @@ inco_df_2011_reshaped <- select(inco_df_2011_reshaped, neighbourhoods, median_ho
 ```{r}
 ### Cleaning geo-location dataset
 clean_geo_data <- janitor::clean_names(geo_data)
-
 clean_geo_data <- extract(clean_geo_data, area_name, into = "neighbourhoods" , regex = "([^(0-9)]+)")
-
-
 clean_geo_data["neighbourhoods"] <- 
   janitor::make_clean_names(as.matrix(clean_geo_data["neighbourhoods"]))
-
 clean_geo_data <- janitor::clean_names(clean_geo_data)
-
 clean_geo_data <- select(clean_geo_data, neighbourhoods, longitude, latitude, geometry)
-
-
 filter(clean_geo_data, neighbourhoods %in% c("mimico","weston_pellam_park"))
-
 clean_geo_data["neighbourhoods"][c(17,67),] <- c("mimico_includes_humber_bay_shores","weston_pelham_park")
-
 clean_geo_data
-
 ```
 # Income and Education by Major 2011
 
@@ -195,7 +175,6 @@ clean_geo_data
 #Merge income and education 2011
 merged_df <- merge(edu_df_2011_reshaped, inco_df_2011_reshaped, by = 'neighbourhoods')
 merged_df <- merge(merged_df, clean_geo_data, by = 'neighbourhoods', all.x = TRUE)
-
 #Create a sf version
 sf_merged_df <- st_sf(merged_df, sf_column_name = "geometry")
 colnames(sf_merged_df) <- c("neighbourhoods" ,
@@ -219,7 +198,6 @@ colnames(merged_df)
 ```
 ```{r echo=FALSE, include=TRUE, message=FALSE, fig.height = 1.5, fig.width = 9}
 ### Explore relationship between income and every major percentage ###
-
 #Create a new dataframe and change column names. Remove last three columns
 education_percentage_only <- merged_df[,1:(length(merged_df)-3)]
 colnames(education_percentage_only) <- c("neighbourhoods" ,
@@ -319,7 +297,6 @@ tm_shape(sf_merged_df) +
               legend.hist = TRUE,
               palette = "seq") +
   tm_layout(legend.outside = TRUE)
-
 #Plot all majors without palette
 tmap_mode("plot")
 tm_shape(sf_merged_df) +
@@ -338,12 +315,10 @@ tm_layout(legend.show = TRUE, legend.position = c("right", "bottom"), title.size
 "health" ,
 "transportation")) +
   tm_facets(sync = TRUE, ncol = 4)
-
 ```
 
 
 ```{r echo=FALSE, include=TRUE, message=FALSE, warning=FALSE}
-
 correlation_df <- as.data.frame(cor(education_percentage_only[,2:(length(education_percentage_only)-2)], education_percentage_only$median_income))
 correlation_df <- round(correlation_df, digits = 2)
 colnames(correlation_df) <- "correlation"
@@ -352,6 +327,5 @@ correlation_df <- mutate(correlation_df, major = rownames(correlation_df))
 correlation_df <- select(correlation_df, major, correlation)
 correlation_df <- correlation_df[order(correlation_df$correlation),]
 row.names(correlation_df)<-1:nrow(correlation_df)
-
 kable(correlation_df)
 ```
