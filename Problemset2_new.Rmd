@@ -3,7 +3,10 @@ title: "ProblemSet2_new"
 author: "Ke-li Chiu & Diego Mamanche Castellanos"
 date: "06/02/2020"
 output: pdf_document
-abstract: "Education is a contributor to many beneficial socio-economic outcomes. We intend to exam the education profile in the selected neighbourhoods of Toronto that have polarized household income from the data set package *Wellbeing Toronto - Demographics: NHS Indicators*. We first observe that the income gap between the neighbourhood with the highest household income and the lowest is enormous. The median household income of Bridle Path-Sunnybrook-York Mills is almost nine times more than Regent Park before tax. Bridle Path-Sunnybrook-York Mills also has a much higher attainment rate (45%) of higher education above a bachelor's degree than Regent Park (23%) and the City of Toronto (27%). We intend to use the comparison to bring awareness of inequality in income and education existing in the City of Toronto."
+abstract: "Education is a contributor to many beneficial socio-economic outcomes.
+  We intend to exam the education profile in the selected neighbourhoods of Toronto
+  that have polarized household income from the data set package *Wellbeing Toronto
+  - Demographics: NHS Indicators*. We first observe that the income gap between the"
 ---
 
 ```{r setup, include=FALSE}
@@ -108,7 +111,7 @@ scaled_education_df_2011 <-
 #Multiply by 100
 scaled_education_df_2011[,2:length(education_df_2011)] <- sapply(scaled_education_df_2011[,2:length(scaled_education_df_2011)], function(x) (x*100))
 
-#Round new sclaes to 3 digits
+#Round new scales to 2 digits
 scaled_education_df_2011 <-
   scaled_education_df_2011 %>%
     janitor::adorn_rounding(digits = 2)
@@ -214,7 +217,7 @@ colnames(sf_merged_df) <- c("neighbourhoods" ,
 "latitude",                                                                                  "geometry")
 colnames(merged_df)
 ```
-```{r echo=FALSE, include=TRUE, message=FALSE, fig.height = 6, fig.width = 9}
+```{r echo=FALSE, include=TRUE, message=FALSE, fig.height = 1.5, fig.width = 9}
 ### Explore relationship between income and every major percentage ###
 
 #Create a new dataframe and change column names. Remove last three columns
@@ -238,7 +241,8 @@ colnames(education_percentage_only) <- c("neighbourhoods" ,
 education_percentage_only %>%
   gather(-c(median_income, neighbourhoods), key = "var", value = "value") %>% 
   ggplot(aes(x = value, y = median_income)) +
-    facet_wrap(~ var, scales = "fixed") +
+    #facet_wrap(~ var, scales = "free") +
+    facet_grid(~ var, ) +
     geom_point(shape=20, color="blue", size=1) +
     stat_smooth(method=lm, se=FALSE,  colour="red") +
     labs(title = "Major by Income", x = "Neighbourhood Distribution by Major (%)", 
@@ -303,7 +307,9 @@ data_plot_highest %>%
        y = "Distribution (%)")
 ```
 
-```{r echo=FALSE, include=TRUE, message=FALSE, fig.height = 5, fig.width = 9, warning=FALSE}
+
+
+```{r echo=FALSE, include=TRUE, message=FALSE, fig.align ="right", fig.height = 5, fig.width = 9, warning=FALSE}
 #Plot Median Income
 tmap_mode("plot")
 tm_shape(sf_merged_df) +
@@ -333,4 +339,19 @@ tm_layout(legend.show = TRUE, legend.position = c("right", "bottom"), title.size
 "transportation")) +
   tm_facets(sync = TRUE, ncol = 4)
 
+```
+
+
+```{r echo=FALSE, include=TRUE, message=FALSE, warning=FALSE}
+
+correlation_df <- as.data.frame(cor(education_percentage_only[,2:(length(education_percentage_only)-2)], education_percentage_only$median_income))
+correlation_df <- round(correlation_df, digits = 2)
+colnames(correlation_df) <- "correlation"
+correlation_df <- mutate(correlation_df, major = rownames(correlation_df))
+#Reorder columns
+correlation_df <- select(correlation_df, major, correlation)
+correlation_df <- correlation_df[order(correlation_df$correlation),]
+row.names(correlation_df)<-1:nrow(correlation_df)
+
+kable(correlation_df)
 ```
