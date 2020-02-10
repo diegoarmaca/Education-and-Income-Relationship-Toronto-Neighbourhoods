@@ -265,7 +265,7 @@ kable(correlation_df)
 The four categories that have the largest correlation scores are plotted into choropleth maps to be compared with Figure 1. The distribution of business, education and asfd have the similar pattern with 
 
 
-```{r echo=FALSE, include=TRUE, message=FALSE, fig.height = 5, fig.width = 9}
+```{r echo=FALSE, include=TRUE, message=FALSE, fig.height = 5, fig.width = 9, warning=FALSE}
 #Plot all majors without palette
 tmap_mode("plot")
 tm_shape(sf_merged_df) +
