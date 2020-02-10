@@ -23,35 +23,44 @@ library(sf)
 library(tmap)
 library(tmaptools)
 library(leaflet)
+
 ```
 
 # Introduction
 Education is a contributor to many beneficial socio-economic outcomes. In this study, we intend to examine the relationship between household income and educational profile in terms of residents' academic majors in Toronto's 140 neighbourhoods. The majors are categorized as follows—
-"visual and performing arts and communications technologies," "humanities," "social and behavioural sciences and law," "business_management_and_public_administration," "physical and life sciences and technologies," "mathematics computer and information sciences," "architecture engineering and related technologies," "agriculture natural resources and conservation," "personal protective and transportation services" and "no postsecondary certificate diploma or degree." The question we want to answer is if we can find a higher population percentage in specific academic majors in higher-income neighbourhoods or vice versa? The question is relevant because the academic major is a significant factor for people's occupations and their associated earning; thus, it is deemed as an essential tool for social mobility. 
+"visual and performing arts and communications technologies," "humanities," "social and behavioural sciences and law," "business_management_and_public_administration," "physical and life sciences and technologies," "mathematics computer and information sciences," "architecture engineering and related technologies," "agriculture natural resources and conservation," "personal protective and transportation services" and "no postsecondary certificate diploma or degree." The question we want to answer is if we can find a higher population percentage in specific academic majors in higher-income neighbourhoods or vice versa? The question is relevant because the academic major is a significant factor for people's occupations and their associated earning; thus, it is deemed as an essential tool for social mobility.
 
-```{r echo=FALSE, include=FALSE, message=FALSE}
+```{r echo=FALSE, include=FALSE, message=FALSE, warning=FALSE}
 #Set working Directory
 #setwd("~/Experimental Design for Data Science/ProblemSet2")
+
 # Search packages (this returns a table)
 neighbourhood_packages <- search_packages("Neighbourhood")
 # Filter the neighbourhood demographic dataset
 neighbourhood_demographics_package<- neighbourhood_packages %>%
   filter(title == "Neighbourhood Profiles")
+
 #Create main dataset for year 2011 
 main_df_2011 <-  neighbourhood_demographics_package %>% # Start with the package 
   list_package_resources() %>% # List the resources in the package
   filter(name == "Neighbourhood Data 2001, 2006, 2011.xlsx") %>% # Only keep the resource we want 
   get_resource()
+
 ### GEO-LOCATION DATASET TORONTO BY NEIGHBOURHOODS ###
+
 # get package
 package <- show_package("4def3f65-2a65-4a4f-83c4-b2a4aed72d46")
 package
+
 # get all resources for this package
 resources <- list_package_resources("4def3f65-2a65-4a4f-83c4-b2a4aed72d46")
+
 # identify datastore resources; by default, Toronto Open Data sets datastore resource format to CSV for non-geospatial and GeoJSON for geospatial resources
 datastore_resources <- filter(resources, tolower(format) %in% c('csv', 'geojson'))
+
 # load the first datastore resource as a sample
 geo_data <- filter(datastore_resources, row_number()==1) %>% get_resource()
+
 ```
 
 # Dataset and method descriptiion
@@ -63,20 +72,9 @@ Exploratory data analysis is conducted to obtain insight from the dataset. To ge
 Because we chose to look at the median instead of the mean of household income, we are excluding the outliers in the income distribution. The median value would give us a more accurate picture of the neighbourhoods' economic status but also prohibit us from investigating further the outliers that are skewing the distributions. Moreover, although there are datasets for 2001,2006, 2011 and 2016, the structure and available information of the datasets are inconsistent. For example, median total household income for all neighbourhoods is only available in the dataset from 2011; therefore, this study is limited to the year 2011 and is unable to provide a comparison between Census years regarding the changes in income and education profile of the neighbourhoods. Finally, we are also not able to find out the income distribution by academic fields. Therefore, earnings differences linking to differences in residents' fields of study are not included in our analysis. This prevents from knowing if specific academic majors are more significant contributors to the neighbourhoods' total household income.
 
 ## Ethical considerations
-Population percentage in specific majors have correlations with median household income in the 140 neighbourhoods. For example, higher income neighbourhoods have more percentage of business majors, and lower income neighbourhoods have more percentage of transportation majors. This observation, without further anaylysis, potentially projects social status and ranking among academic fields. 
+Population percentage in specific majors have correlations with median household income in the 140 neighbourhoods. For example, higher income neighbourhoods have more percentage of business majors, and lower income neighbourhoods have more percentage of transportation majors. This observation, without further anaylysis, potentially projects social status and ranking among academic fields.
 
-# Income distribution map
-Darker areas in the above map indicate high levels of unemployment, while lighter areas indicate low levels of unemployment. As Figure 1 shows, we observe that higher income neighbourhoods tend to be in the central part of Toronto, neighbouring each other.
-
-# Correlation between income and academic majors
-We conducted a correlation matrix table to see if certain majors have correlation with household income. As a result, we find that business, education, and [sss] have stronger positive correlations, which no certificate has strong negative correlation. 
-
-# Majors distribution map
-The four categories that have the largest correlation scores are plotted into choropleth maps to be compared with Figure 1. The distribution of business, education and asfd have the similar pattern with 
-
-# Comparison between polarized neighbourhoods and the City of Toronto
-
-```{r echo=FALSE, include=FALSE, message=FALSE}
+```{r echo=FALSE, include=FALSE, message=FALSE, warning=FALSE}
 ##### Distribution by education 2011####
 #Select sheet 2011
 clean_header_df_2011 <- main_df_2011$`2011`
@@ -93,23 +91,27 @@ education_df_2011 <- education_df_2011[,3:length(education_df_2011)]
 #Change class of columns containing numbers as.numeric 
 education_df_2011[,2:length(education_df_2011)] <- sapply(education_df_2011[,2:length(education_df_2011)], function(x) as.numeric(x))
 ```
-```{r echo=FALSE, include=FALSE, message=FALSE}
+```{r echo=FALSE, include=FALSE, message=FALSE, warning=FALSE}
 #Create new dataframe
 scaled_education_df_2011 <- education_df_2011
 #Scale dataframe by column
 scaled_education_df_2011 <-
   scaled_education_df_2011 %>%
     janitor::adorn_percentages(denominator = "col")
+
+
 #Multiply by 100
 scaled_education_df_2011[,2:length(education_df_2011)] <- sapply(scaled_education_df_2011[,2:length(scaled_education_df_2011)], function(x) (x*100))
+
 #Round new scales to 2 digits
 scaled_education_df_2011 <-
   scaled_education_df_2011 %>%
     janitor::adorn_rounding(digits = 2)
+
 #Transform the result to dataframe
 scaled_education_df_2011 <- as.data.frame(scaled_education_df_2011)
 ```
-```{r echo=FALSE, include=FALSE, message=FALSE}
+```{r echo=FALSE, include=FALSE, message=FALSE, warning=FALSE}
 #Save neighbourhoods into a dataframe
 col_names_2011 <- as.data.frame(colnames(scaled_education_df_2011))
 col_names_2011 <- col_names_2011[2:nrow(col_names_2011),]
@@ -125,8 +127,6 @@ edu_df_2011_reshaped <- janitor::clean_names(edu_df_2011_reshaped)
 #Reorder columns
 edu_df_2011_reshaped <- select(edu_df_2011_reshaped, neighbourhoods, no_postsecondary_certificate_diploma_or_degree:other_fields_of_study)
 ```
-
-
 ```{r echo=FALSE, include=FALSE, message=FALSE}
 ##### Distribution by income 2011####
 #Select sheet 2011
@@ -156,17 +156,27 @@ inco_df_2011_reshaped <- janitor::clean_names(inco_df_2011_reshaped)
 #Reorder columns
 inco_df_2011_reshaped <- select(inco_df_2011_reshaped, neighbourhoods, median_household_total_income)
 ```
-```{r}
+```{r echo=FALSE, include=FALSE, message=FALSE}
 ### Cleaning geo-location dataset
 clean_geo_data <- janitor::clean_names(geo_data)
+
 clean_geo_data <- extract(clean_geo_data, area_name, into = "neighbourhoods" , regex = "([^(0-9)]+)")
+
+
 clean_geo_data["neighbourhoods"] <- 
   janitor::make_clean_names(as.matrix(clean_geo_data["neighbourhoods"]))
+
 clean_geo_data <- janitor::clean_names(clean_geo_data)
+
 clean_geo_data <- select(clean_geo_data, neighbourhoods, longitude, latitude, geometry)
+
+
 filter(clean_geo_data, neighbourhoods %in% c("mimico","weston_pellam_park"))
+
 clean_geo_data["neighbourhoods"][c(17,67),] <- c("mimico_includes_humber_bay_shores","weston_pelham_park")
+
 clean_geo_data
+
 ```
 # Income and Education by Major 2011
 
@@ -175,6 +185,7 @@ clean_geo_data
 #Merge income and education 2011
 merged_df <- merge(edu_df_2011_reshaped, inco_df_2011_reshaped, by = 'neighbourhoods')
 merged_df <- merge(merged_df, clean_geo_data, by = 'neighbourhoods', all.x = TRUE)
+
 #Create a sf version
 sf_merged_df <- st_sf(merged_df, sf_column_name = "geometry")
 colnames(sf_merged_df) <- c("neighbourhoods" ,
@@ -198,6 +209,7 @@ colnames(merged_df)
 ```
 ```{r echo=FALSE, include=TRUE, message=FALSE, fig.height = 1.5, fig.width = 9}
 ### Explore relationship between income and every major percentage ###
+
 #Create a new dataframe and change column names. Remove last three columns
 education_percentage_only <- merged_df[,1:(length(merged_df)-3)]
 colnames(education_percentage_only) <- c("neighbourhoods" ,
@@ -215,79 +227,12 @@ colnames(education_percentage_only) <- c("neighbourhoods" ,
 "transportation" ,
 "other" ,
 "median_income")
-#Plot each major in terms of income (y) and neighbourhood participation in each major (x)
-education_percentage_only %>%
-  gather(-c(median_income, neighbourhoods), key = "var", value = "value") %>% 
-  ggplot(aes(x = value, y = median_income)) +
-    #facet_wrap(~ var, scales = "free") +
-    facet_grid(~ var, ) +
-    geom_point(shape=20, color="blue", size=1) +
-    stat_smooth(method=lm, se=FALSE,  colour="red") +
-    labs(title = "Major by Income", x = "Neighbourhood Distribution by Major (%)", 
-       y = "Median Income")
 ```
 
-```{r echo=FALSE, include=TRUE, message=FALSE, fig.height = 5, fig.width = 9}
-### Business major seem to have a stiff line, lets zoom in to it ###
-# Get highest 5 and lowest 5 income values
-income <- education_percentage_only$median_income
-h5th <- sort(income)[length(income)-4]
-l5th <- sort(income)[5]
-# Assign income labels to the neighbourhoods
-education_percentage_only$range<-ifelse(income >= h5th,"top 5",
-		ifelse(income <= l5th,"bottom 5","rest"
-		))
-# Plot business major by income and neighbourhood distribution
-ggplot(education_percentage_only, aes(x=business, y=median_income, color=range)) +        geom_point() + 
-    labs(title = "Business Major by Income", x = "Distribution by Major (%)", 
-       y = "Median Income")
-# Run linear regression model
-linearMod <- lm(business ~ median_income, data=education_percentage_only)
-summary(linearMod)
-```
+# Income distribution map
+Darker areas in the above map indicate high levels of unemployment, while lighter areas indicate low levels of unemployment. As Figure 1 shows, we observe that higher income neighbourhoods tend to be in the central part of Toronto, neighbouring each other.
 
-
-```{r echo=FALSE, include=TRUE, message=FALSE, fig.height = 4, fig.width = 9}
-### Analizing the highest income neighbourhood ###
-# Plot major percentage distribution in highest income neighbourhood
-education_df_highest <- education_percentage_only %>%
-  filter(median_income == max(median_income) )
-data_plot_highest <- 
-  education_df_highest %>% 
-  pivot_longer(cols = "education":"transportation", names_to = "major")
-# Make a bar chart
-data_plot_highest %>% 
-  ggplot(aes(x = major, y = value, fill = major)) +
-  geom_col()+
-  ylim(0,30)+
-  scale_x_discrete(
-        labels=c("Agri", "Arch", "Art", "Bus","Edu", "Health", "Hum","Math", "Phys","Social", "Tran"))+
-  labs(title = "Highest Income Neighbourhood by Major", x = "Major", 
-       y = "Distribution (%)")
-```
-
-```{r echo=FALSE, include=TRUE, message=FALSE, fig.height = 4, fig.width = 9}
-### Analizing the lowest income neighbourhood ###
-# Plot major percentage distribution in lowest income neighbourhood
-education_df_highest <- education_percentage_only %>%
-  filter(median_income == min(median_income) )
-data_plot_highest <- 
-  education_df_highest %>% 
-  pivot_longer(cols = "education":"transportation", names_to = "major")
-# Make a bar chart
-data_plot_highest %>% 
-  ggplot(aes(x = major, y = value, fill = major)) +
-  geom_col()+
-  ylim(0,30)+
-  scale_x_discrete(
-        labels=c("Agri", "Arch", "Art", "Bus","Edu", "Health", "Hum","Math", "Phys","Social", "Tran"))+
-  labs(title = "Lowest Income Neighbourhood by Major", x = "Major", 
-       y = "Distribution (%)")
-```
-
-
-
-```{r echo=FALSE, include=TRUE, message=FALSE, fig.align ="right", fig.height = 5, fig.width = 9, warning=FALSE}
+```{r echo=FALSE, include=TRUE, message=FALSE, fig.align ="right", fig.height = 3, fig.width = 6, warning=FALSE}
 #Plot Median Income
 tmap_mode("plot")
 tm_shape(sf_merged_df) +
@@ -297,28 +242,13 @@ tm_shape(sf_merged_df) +
               legend.hist = TRUE,
               palette = "seq") +
   tm_layout(legend.outside = TRUE)
-#Plot all majors without palette
-tmap_mode("plot")
-tm_shape(sf_merged_df) +
-tm_scale_bar(width = 0.5)+
-tm_layout(legend.show = TRUE, legend.position = c("right", "bottom"), title.size = 2, title.position = c("center","center")) +
-  tm_polygons(c("no_certificate" ,
-"education" ,
-"arts_&_com",
-"humanities" ,
-"social_&_law" ,
-"business" ,
-"physical_&_life" ,
-"mathematics_&_it" ,
-"architecture_engin" ,
-"agriculture" ,
-"health" ,
-"transportation")) +
-  tm_facets(sync = TRUE, ncol = 4)
 ```
 
+# Correlation between income and academic majors
+We conducted a correlation matrix table to see if certain majors have correlation with household income. As a result, we find that business, education, and [sss] have stronger positive correlations, which no certificate has strong negative correlation.
 
-```{r echo=FALSE, include=TRUE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, include=TRUE, message=FALSE, warning=FALSE, results='asis', }
+### Correlation table
 correlation_df <- as.data.frame(cor(education_percentage_only[,2:(length(education_percentage_only)-2)], education_percentage_only$median_income))
 correlation_df <- round(correlation_df, digits = 2)
 colnames(correlation_df) <- "correlation"
@@ -327,5 +257,43 @@ correlation_df <- mutate(correlation_df, major = rownames(correlation_df))
 correlation_df <- select(correlation_df, major, correlation)
 correlation_df <- correlation_df[order(correlation_df$correlation),]
 row.names(correlation_df)<-1:nrow(correlation_df)
+
 kable(correlation_df)
+```
+
+# Majors distribution map
+The four categories that have the largest correlation scores are plotted into choropleth maps to be compared with Figure 1. The distribution of business, education and asfd have the similar pattern with 
+
+
+```{r echo=FALSE, include=TRUE, message=FALSE, fig.height = 5, fig.width = 9}
+#Plot all majors without palette
+tmap_mode("plot")
+tm_shape(sf_merged_df) +
+tm_layout(legend.show = TRUE, legend.position = c("right", "bottom"), title.size = 2, title.position = c("center","center")) +
+  tm_polygons(c("no_certificate" ,
+"education" ,
+"social_&_law" ,
+"business")) +
+  tm_facets(sync = TRUE, ncol = 2)
+
+```
+
+# Comparison between polarized neighbourhoods and the City of Toronto
+
+
+```{r echo=FALSE, include=TRUE, message=FALSE, fig.height = 5, fig.width = 9}
+
+data_plot_group <- 
+  education_percentage_only %>% 
+  filter(neighbourhoods == "bridle_path_sunnybrook_york_mills" | neighbourhoods == "regent_park" |neighbourhoods == "regent_park" | neighbourhoods == "city_of_toronto")%>% 
+  pivot_longer(cols = "no_certificate":"transportation", names_to = "major")
+
+ggplot(data_plot_group, aes(x = neighbourhoods, y = value, fill = major)) + 
+  # Specify that we want a bar graph:
+  geom_bar(stat="identity", position=position_dodge()) +
+  # Add graph title and axis labels:
+  labs(title = "Academic Major Population Percentage", x = "Neighbourhoods", 
+       y = "Population (%)") +
+  # Rename the legend labels to be more readable
+  scale_fill_discrete(name = "")
 ```
