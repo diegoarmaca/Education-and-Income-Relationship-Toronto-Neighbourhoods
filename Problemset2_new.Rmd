@@ -1,9 +1,10 @@
 ---
-title: "ProblemSet2_new"
-author: "Ke-li Chiu & Diego Mamanche Castellanos"
+title: "Higher Income Neighbourhood Have Higher Percentage Population Majoring in Specific Majors"
+author: "Ke-Li Chiu & Diego Mamanche Castellanos"
 date: "06/02/2020"
 output: pdf_document
-abstract: "Education is a contributor to many beneficial socio-economic outcomes. We intend to exam the the relationship between academic majors and household income in Toronto's neighbourhoods—can we find higher or lower percentage population in certain academic majors in higher or lower income neighbourhoods? The result shows that higher income neighbourhoods also have higher percentage of residents with majors in business, The data set is retrieved from the package *City of Toronto Neighbourhood Profiles* from the year 2011. ###### We intend to use the comparison to bring awareness of inequality in income and education existing in the City of Toronto."
+fontsize: 5pt
+abstract: "Education is a contributor to many beneficial socio-economic outcomes. We intend to exam the the relationship between academic majors and household income in Toronto's neighbourhoods—can we find higher or lower percentage population in certain academic majors in higher or lower income neighbourhoods? Choropleth maps are plotted for both household income distribution and academic major distribution among Toronto's neighbourhoods. The result shows that higher income neighbourhoods also have higher percentage of residents with majors in 'business management and public administration,' 'education,' and 'social and behavioural sciences and law.' Through a grouped bar chart that compares the academic major distribution in the City of Toronto and the neighbourhoods with the highest income and lowest income, we discover that all three groups shares a similar shape in distribution, but the scales in percentage drastically differ: In Bridle Path Sunnybrook York, the percentage of the population who have no certificate is 5.47 % higher than the percentage of the population who major in 'business management and public administration'. In Regent Park, the percentage of the population who have no certificate is much higher than the percentage of the population who major in 'business management and public administration' by 37.31%. We intend to use the comparison to bring awareness of inequality in income and education existing in the City of Toronto."
 ---
 
 ```{r setup, include=FALSE}
@@ -60,7 +61,7 @@ City of Toronto Neighbourhood Profiles data set is sourced from several Census t
 Exploratory data analysis is conducted to obtain insight from the dataset. To get a picture of a neighbourhood's economic status, we look at the median total household income which divides the income distribution into two equal groups, half having income above that amount, and half having income below that amount. As for the education profile, the academic majors of the residents are the variables in which we are interested. Each field for the major is the number of people who took this major in the neighbourhood. To be able to compare the neighbourhood regardless of the difference in population, we turn the value to percentages by dividing the total population between 25 to 64 years old by the population in each major. All codes are available in Appendix A.
 
 ## Limitation of the Dataset and Approach
-Because we chose to look at the median instead of the mean of household income, we are excluding the outliers in the income distribution. The median value would give us a more accurate picture of the neighbourhoods' economic status but also prohibit us from investigating further the outliers that are skewing the distributions. Moreover, although there are datasets for 2001,2006, 2011 and 2016, the structure and available information of the datasets are inconsistent. For example, median total household income for all neighbourhoods is only available in the dataset from 2011; therefore, this study is limited to the year 2011 and is unable to provide a comparison between Census years regarding the changes in income and education profile of the neighbourhoods. Finally, we are also not able to find out the income distribution by academic fields. Therefore, earnings differences linking to differences in residents' fields of study are not included in our analysis. This prevents from knowing if specific academic majors are more significant contributors to the neighbourhoods' total household income.
+Because we chose to look at the median instead of the mean of household income, we are excluding the outliers in the income distribution. The median value would give us a more accurate picture of the neighbourhoods' economic status but also prohibit us from investigating further the outliers that are skewing the distributions. Moreover, we are also not able to find out the income distribution by academic fields. Therefore, earnings differences linking to differences in residents' fields of study are not included in our analysis. This prevents from knowing if specific academic majors are more significant contributors to the neighbourhoods' total household income.
 
 ## Ethical Considerations
 Population percentage in specific majors have correlations with median household income in the 140 neighbourhoods. For example, higher income neighbourhoods have more percentage of business majors, and lower income neighbourhoods have more percentage of transportation majors. This observation, without further anaylysis, potentially projects social status and ranking among academic fields.
@@ -219,7 +220,7 @@ tm_shape(sf_merged_df) +
 Figure 1: Median household income map 
 
 # Correlation Between Household Income and Academic Majors
-We conducted a correlation matrix table to see if certain majors correlate with household income. As a result, shown in Table 1, "business management and public administration", "education", "social and behavioural sciences and law", have stronger positive correlations with household income. In contrast, "no certificate" has a strong negative correlation.
+We conducted a correlation matrix table to see if certain majors correlate with household income. As a result, shown in Table 1, "business management and public administration," "education," "social and behavioural sciences and law," have stronger positive correlations with household income. In contrast, "no certificate" has a strong negative correlation.
 
 ```{r echo=FALSE, include=TRUE, message=FALSE, warning=FALSE, results='asis', }
 ### Correlation table
@@ -252,7 +253,7 @@ tm_layout(legend.show = TRUE, legend.position = c("right", "bottom"), title.size
 Figure 2: Distribution maps for selected majors
 
 # Comparison Between Polarized Neighbourhoods and the City of Toronto
-Finally, we gathered the population percentage in different majors for the neighbourhoods that have the highest income (Bridle Path Sunnybrook York) and the lowest income (Regent Park) and compared them with the City of Toronto. As Figure 3 shows, the shapes of the academic major distributions in the three groups are similar to each other; most population percentage lies in "no certification," and the second-largest portion lies in "business management and public administration." However, the scales of population percentages in different majors have apparent differences in the three groups. Bridle Path Sunnybrook York, the percentage of the population who have no certificate is 5.47 % higher than than the percentage of the population who major in "business management and public administration". In Regent Park, the percentage of the population who have no certificate is drastically higher than the percentage of the population who major in "business management and public administration" by 37.31%. 
+Finally, we gathered the population percentage in different majors for the neighbourhoods that have the highest income (Bridle Path Sunnybrook York) and the lowest income (Regent Park) and compared them with the City of Toronto. As Figure 3 shows, the shapes of the academic major distributions in the three groups are similar to each other; most population percentage lies in "no certification," and the second-largest portion lies in "business management and public administration." However, the scales of population percentages in different majors have apparent differences in the three groups. In Bridle Path Sunnybrook York, the percentage of the population who have no certificate is 5.47 % higher than the percentage of the population who major in "business management and public administration". In Regent Park, the percentage of the population who have no certificate is drastically higher than the percentage of the population who major in "business management and public administration" by 37.31%. 
 
 
 ```{r echo=FALSE, include=TRUE, message=FALSE, fig.height = 5, fig.width = 9}
@@ -269,8 +270,8 @@ ggplot(data_plot_group, aes(x = neighbourhoods, y = value, fill = major)) +
   # Rename the legend labels to be more readable
   scale_fill_discrete(name = "")
 ```
-Figure 3: Population percentage in each academic major in different neighbourhoods
 
+Figure 3: Population percentage in each academic major in different neighbourhoods
 
 \pagebreak
 # Appendix A
