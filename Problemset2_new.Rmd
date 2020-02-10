@@ -54,7 +54,7 @@ datastore_resources <- filter(resources, tolower(format) %in% c('csv', 'geojson'
 geo_data <- filter(datastore_resources, row_number()==1) %>% get_resource()
 ```
 
-# Dataset and Method Descriptiion
+# Dataset and Method Description
 City of Toronto Neighbourhood Profiles data set is sourced from several Census tables released by Statistics Canada every five years. The dataset uses this Census data to provide a portrait of the demographic, social and economic characteristics of the people and households in each City of Toronto neighbourhood. Each data point in this file is presented for the City's 140 neighbourhoods, as well as for the City of Toronto as a whole. The data set consists of 144 columns for neighbourhoods and 1537 rows for characteristics of the neighbourhoods. Data cleaning and reshaping are performed to have a new data frame that has 14 characteristics regarding topics of income as columns and education and the 140 neighbourhoods as rows.
 
 Exploratory data analysis is conducted to obtain insight from the dataset. To get a picture of a neighbourhood's economic status, we look at the median total household income which divides the income distribution into two equal groups, half having income above that amount, and half having income below that amount. As for the education profile, the academic majors of the residents are the variables in which we are interested. Each field for the major is the number of people who took this major in the neighbourhood. To be able to compare the neighbourhood regardless of the difference in population, we turn the value to percentages by dividing the total population between 25 to 64 years old by the population in each major. All codes are available in Appendix A.
@@ -219,7 +219,7 @@ tm_shape(sf_merged_df) +
 Figure 1: Median household income map 
 
 # Correlation Between Household Income and Academic Majors
-We conducted a correlation matrix table to see if certain majors correlate with household income. As a result, shown in Table 1, "business management and public administration," "education," "social and behavioural sciences and law," have stronger positive correlations with household income. In contrast, "no certificate" has a strong negative correlation.
+We conducted a correlation matrix table to see if certain majors correlate with household income. As a result, shown in Table 1, "business management and public administration", "education", "social and behavioural sciences and law", have stronger positive correlations with household income. In contrast, "no certificate" has a strong negative correlation.
 
 ```{r echo=FALSE, include=TRUE, message=FALSE, warning=FALSE, results='asis', }
 ### Correlation table
@@ -270,3 +270,59 @@ ggplot(data_plot_group, aes(x = neighbourhoods, y = value, fill = major)) +
   scale_fill_discrete(name = "")
 ```
 Figure 3: Population percentage in each academic major in different neighbourhoods
+
+
+\pagebreak
+# Appendix A
+```{r ref.label=knitr::all_labels(), echo = T, eval = F, tidy=TRUE, tidy.opts=list(width.cutoff=60), results='asis'}
+```
+
+\pagebreak
+# References
+
+
+Open Data Dataset. (n.d.). Retrieved January 30, 2020, from https://open.toronto.ca/dataset/
+wellbeing-toronto-demographics-nhs-indicators/
+
+R Core Team (2019). R: A language and environment for statistical computing. R
+Foundation for Statistical Computing, Vienna, Austria. URL https://www.R-project.org/.
+
+H. Wickham. ggplot2: Elegant Graphics for Data Analysis. Springer-Verlag New York, 2016.
+
+Sharla Gelfand (2019). opendatatoronto: Access the City of Toronto Open Data Portal. R
+package version 0.1.1. https://CRAN.R-project.org/package=opendatatoronto
+  
+Hadley Wickham, Romain François, Lionel Henry and Kirill Müller (2019). dplyr: A Grammar
+of Data Manipulation. R package version 0.8.3. https://CRAN.R-project.org/package=dplyr
+
+Hadley Wickham and Lionel Henry (2019). tidyr: Tidy Messy Data. R package version 1.0.0.
+https://CRAN.R-project.org/package=tidyr
+
+Wickham et al., (2019). Welcome to the tidyverse. Journal of Open Source Software,
+4(43), 1686, https://doi.org/10.21105/joss.01686
+
+Yihui Xie (2019). knitr: A General-Purpose Package for Dynamic Report Generation in R. R
+package version 1.25.
+
+Yihui Xie (2015) Dynamic Documents with R and knitr. 2nd edition. Chapman and Hall/CRC.
+ISBN 978-1498716963
+
+Yihui Xie (2014) knitr: A Comprehensive Tool for Reproducible Research in R. In Victoria
+Stodden, Friedrich Leisch and Roger D. Peng, editors, Implementing Reproducible
+
+Matt Dowle and Arun Srinivasan (2019). data.table: Extension of `data.frame`. R package
+version 1.12.6. https://CRAN.R-project.org/package=data.table
+Computational Research. Chapman and Hall/CRC. ISBN 978-1466561595
+
+Pebesma, E., 2018. Simple Features for R: Standardized Support for Spatial Vector Data.
+The R Journal 10 (1), 439-446, https://doi.org/10.32614/RJ-2018-009
+
+Tennekes M (2018). “tmap: Thematic Maps in R.” _Journal of Statistical Software_, *84*(6),
+1-39. doi: 10.18637/jss.v084.i06 (URL: https://doi.org/10.18637/jss.v084.i06).
+
+Martijn Tennekes (2019). tmaptools: Thematic Map Tools. R package version 2.0-2.
+https://CRAN.R-project.org/package=tmaptools
+
+Joe Cheng, Bhaskar Karambelkar and Yihui Xie (2019). leaflet: Create Interactive Web
+Maps with the JavaScript 'Leaflet' Library. R package version 2.0.3.
+https://CRAN.R-project.org/package=leaflet
