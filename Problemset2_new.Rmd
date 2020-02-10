@@ -304,33 +304,20 @@ data_plot_highest %>%
 ```
 
 ```{r echo=FALSE, include=TRUE, message=FALSE, fig.height = 5, fig.width = 9, warning=FALSE}
-#Plot Business
+#Plot Median Income
 tmap_mode("plot")
 tm_shape(sf_merged_df) +
-  tm_polygons(col = "business")
-
-#Plot all majors
-tmap_mode("plot")
-tm_shape(sf_merged_df) +
-tm_layout(legend.show = TRUE, legend.position = c("right", "bottom"), title.size = 2) +
-  tm_polygons(c("no_certificate" ,
-"education" ,
-"arts_&_com",
-"humanities" ,
-"social_&_law" ,
-"business" ,
-"physical_&_life" ,
-"mathematics_&_it" ,
-"architecture_engin" ,
-"agriculture" ,
-"health" ,
-"transportation"), palette = "RdYlBu") +
-  tm_facets(sync = TRUE, ncol = 4)
-
+  tm_polygons(col = "median_income",
+              breaks = c(25000,50000,75000,100000,125000,150000,200000),
+              #style = "quantile",
+              legend.hist = TRUE,
+              palette = "seq") +
+  tm_layout(legend.outside = TRUE)
 
 #Plot all majors without palette
 tmap_mode("plot")
 tm_shape(sf_merged_df) +
+tm_scale_bar(width = 0.5)+
 tm_layout(legend.show = TRUE, legend.position = c("right", "bottom"), title.size = 2, title.position = c("center","center")) +
   tm_polygons(c("no_certificate" ,
 "education" ,
